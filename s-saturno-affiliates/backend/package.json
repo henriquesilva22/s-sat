@@ -10,6 +10,7 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:seed": "node prisma/seed.js",
+    "db:setup": "node setup-db.js",
     "db:reset": "prisma migrate reset --force",
     "build": "echo 'Build script - adicione se necessário'",
     "lint": "echo 'Lint script - adicione ESLint se necessário'"
