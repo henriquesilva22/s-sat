@@ -14,6 +14,9 @@ import { ProductGridSkeleton } from '../components/SkeletonLoader'
 // Contexts
 import { useFavorites } from '../contexts/FavoritesContext'
 
+// Mock data for demonstration
+import { mockProducts, mockStores, mockCategories } from '../data/mockData'
+
 const HomePageML = () => {
   console.log('🚀 [HomePageML] Componente iniciado');
   
@@ -56,108 +59,75 @@ const HomePageML = () => {
         setLoading(true)
         setError(null)
         
-        // Carregar produtos e lojas (essenciais)
-        console.log('📡 [HomePageML] Fazendo requisições para produtos e lojas...')
-        
-        const [productsRes, storesRes] = await Promise.all([
-          fetch('http://localhost:3001/api/products'),
-          fetch('http://localhost:3001/api/stores')
-        ])
-        
-        console.log('📊 [HomePageML] Status das respostas:', {
-          products: productsRes.status,
-          stores: storesRes.status
-        })
-        
-        if (!productsRes.ok) {
-          throw new Error(`Erro ao carregar produtos: ${productsRes.status}`)
-        }
-        
-        if (!storesRes.ok) {
-          throw new Error(`Erro ao carregar lojas: ${storesRes.status}`)
-        }
-        
-        const [productsData, storesData] = await Promise.all([
-          productsRes.json(),
-          storesRes.json()
-        ])
-        
-        console.log('📋 [HomePageML] Dados recebidos:', {
-          products: productsData.data?.length || 0,
-          stores: storesData.data?.length || 0,
-          productsSuccess: productsData.success,
-          storesSuccess: storesData.success
-        })
-        
-        if (productsData.success && productsData.data) {
-          console.log('✅ [HomePageML] Definindo produtos:', productsData.data.length)
-          setProducts(productsData.data)
-        } else {
-          console.warn('⚠️ [HomePageML] Produtos não estão em formato esperado')
-          setProducts([])
-        }
-        
-        if (storesData.success && storesData.data) {
-          setStores(storesData.data)
-        } else {
-          setStores([])
+        // Tentar carregar dados da API, mas usar mockados como fallback
+        try {
+          const [productsRes, storesRes] = await Promise.all([
+            fetch('/api/products', { signal: AbortSignal.timeout(5000) }),
+            fetch('/api/stores', { signal: AbortSignal.timeout(5000) })
+          ])
+          
+          if (productsRes.ok && storesRes.ok) {
+            const [productsData, storesData] = await Promise.all([
+              productsRes.json(),
+              storesRes.json()
+            ])
+            
+            if (productsData.success && productsData.data) {
+              console.log('✅ [HomePageML] Usando dados da API:', productsData.data.length)
+              setProducts(productsData.data)
+              setStores(storesData.data || [])
+              
+              // Tentar carregar categorias da API
+              try {
+                const categoriesRes = await fetch('/api/products/categories')
+                if (categoriesRes.ok) {
+                  const categoriesData = await categoriesRes.json()
+                  setCategories(categoriesData.data || [])
+                }
+              } catch {
+                setCategories(mockCategories)
+              }
+            } else {
+              throw new Error('API retornou dados inválidos')
+            }
+          } else {
+            throw new Error('API não disponível')
+          }
+        } catch (apiError) {
+          console.log('📦 [HomePageML] API indisponível, usando dados de demonstração')
+          
+          // Usar dados mockados
+          setProducts(mockProducts)
+          setStores(mockStores)
+          setCategories(mockCategories)
+          
+          // Mostrar toast informativo apenas uma vez
+          if (!sessionStorage.getItem('demoDataNotified')) {
+            toast.success('🌟 Visualizando dados de demonstração!', {
+              duration: 4000,
+              position: 'top-center'
+            })
+            sessionStorage.setItem('demoDataNotified', 'true')
+          }
         }
         
         // Sucesso - finalizar loading
-        console.log('🎯 [HomePageML] Sucesso - definindo loading = false')
+        console.log('🎯 [HomePageML] Carregamento finalizado')
         setLoading(false)
-        
-        // Tentar carregar categorias (opcional)
-        try {
-          const categoriesRes = await fetch('http://localhost:3001/api/products/categories')
-          if (categoriesRes.ok) {
-            const categoriesData = await categoriesRes.json()
-            setCategories(categoriesData.data || [])
-          } else {
-            // Se falhar, extrair categorias dos produtos
-            const uniqueCategories = []
-            const categoryIds = new Set()
-            
-            productsData.data?.forEach(product => {
-              if (product.categories && Array.isArray(product.categories)) {
-                product.categories.forEach(cat => {
-                  if (cat && cat.category && !categoryIds.has(cat.category.id)) {
-                    categoryIds.add(cat.category.id)
-                    uniqueCategories.push(cat.category)
-                  }
-                })
-              }
-            })
-            
-            setCategories(uniqueCategories)
-          }
-        } catch (error) {
-          console.log('Categorias não puderam ser carregadas, extraindo dos produtos')
-          // Extrair categorias dos produtos como fallback
-          const uniqueCategories = []
-          const categoryIds = new Set()
-          
-          productsData.data?.forEach(product => {
-            if (product.categories && Array.isArray(product.categories)) {
-              product.categories.forEach(cat => {
-                if (cat && cat.category && !categoryIds.has(cat.category.id)) {
-                  categoryIds.add(cat.category.id)
-                  uniqueCategories.push(cat.category)
-                }
-              })
-            }
-          })
-          
-          setCategories(uniqueCategories)
-        }
         
       } catch (error) {
-        console.error('💥 [HomePageML] Erro ao buscar dados:', error)
-        setError(`Erro ao carregar produtos: ${error.message}`)
-        toast.error(`Erro ao carregar produtos: ${error.message}`)
-      } finally {
-        console.log('🏁 [HomePageML] Carregamento finalizado')
+        console.error('💥 [HomePageML] Erro crítico:', error)
+        // Em caso de erro crítico, usar dados mockados como fallback
+        setProducts(mockProducts)
+        setStores(mockStores)
+        setCategories(mockCategories)
+        setError(null) // Não mostrar erro se temos dados mockados
         setLoading(false)
+        
+        toast.success('� Visualizando dados de demonstração!', {
+          duration: 4000,
+          position: 'top-center'
+        })
       }
     }
 
