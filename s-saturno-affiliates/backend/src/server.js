@@ -59,7 +59,10 @@ const corsOptions = {
       process.env.CORS_ORIGIN
     ].filter(Boolean);
     
-    if (allowedOrigins.includes(origin)) {
+    // TEMPORÁRIO: Permitir todas origens Vercel para desenvolvimento
+    if (origin && origin.includes('vercel.app')) {
+      callback(null, true);
+    } else if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Não permitido pelo CORS'));
