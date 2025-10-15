@@ -10,6 +10,7 @@ import HomePageNew from './pages/HomePageNew';
 import HomePageML from './pages/HomePageML';
 import FavoritesPage from './pages/FavoritesPage';
 import AdminLogin from './pages/AdminLogin';
+import AdminLoginSimple from './pages/AdminLoginSimple';
 import AdminDashboard from './pages/AdminDashboard';
 import TestProducts from './pages/TestProducts';
 import HomePageMLSimple from './pages/HomePageMLSimple';
@@ -51,13 +52,13 @@ function App() {
             <Route path="/simple" element={<HomePageMLSimple />} />
             
             {/* Rotas administrativas */}
-            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/login" element={<AdminLoginSimple />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/*" element={<AdminDashboard />} />
             
             {/* Rota secreta para admin */}
-            <Route path="/s-admin-2024" element={<AdminLogin />} />
-            <Route path="/gerenciar-saturno" element={<AdminLogin />} />
+            <Route path="/s-admin-2024" element={<AdminLoginSimple />} />
+            <Route path="/gerenciar-saturno" element={<AdminLoginSimple />} />
             
             {/* Rota 404 - Página não encontrada */}
             <Route path="*" element={<NotFound />} />

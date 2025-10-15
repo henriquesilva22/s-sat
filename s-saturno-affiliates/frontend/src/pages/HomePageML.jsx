@@ -14,11 +14,18 @@ import { ProductGridSkeleton } from '../components/SkeletonLoader'
 // Contexts
 import { useFavorites } from '../contexts/FavoritesContext'
 
+// API service
+import { productsAPI, storesAPI } from '../services/api'
+
 // Mock data for demonstration
 import { mockProducts, mockStores, mockCategories } from '../data/mockData'
 
 const HomePageML = () => {
   console.log('🚀 [HomePageML] Componente iniciado');
+  
+  // API URL for logging
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+    (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://s-sat.onrender.com');
   
   // States
   const [products, setProducts] = useState([])
@@ -61,37 +68,26 @@ const HomePageML = () => {
         
         // Tentar carregar dados da API, mas usar mockados como fallback
         try {
-          const [productsRes, storesRes] = await Promise.all([
-            fetch('/api/products', { signal: AbortSignal.timeout(5000) }),
-            fetch('/api/stores', { signal: AbortSignal.timeout(5000) })
+          console.log('🌐 [HomePageML] Conectando com API:', API_BASE_URL)
+          
+          const [productsData, storesData] = await Promise.all([
+            productsAPI.getProducts(),
+            storesAPI.getStores()
           ])
           
-          if (productsRes.ok && storesRes.ok) {
-            const [productsData, storesData] = await Promise.all([
-              productsRes.json(),
-              storesRes.json()
-            ])
+          if (productsData && productsData.data && Array.isArray(productsData.data)) {
+            console.log('✅ [HomePageML] Dados da API carregados:', productsData.data.length, 'produtos')
+            setProducts(productsData.data)
+            setStores(storesData.data || [])
             
-            if (productsData.success && productsData.data) {
-              console.log('✅ [HomePageML] Usando dados da API:', productsData.data.length)
-              setProducts(productsData.data)
-              setStores(storesData.data || [])
-              
-              // Tentar carregar categorias da API
-              try {
-                const categoriesRes = await fetch('/api/products/categories')
-                if (categoriesRes.ok) {
-                  const categoriesData = await categoriesRes.json()
-                  setCategories(categoriesData.data || [])
-                }
-              } catch {
-                setCategories(mockCategories)
-              }
-            } else {
-              throw new Error('API retornou dados inválidos')
-            }
+            // Usar categorias do mock por enquanto
+            console.log('📂 [HomePageML] Usando categorias mock')
+            setCategories(mockCategories)
+            
+            // Mostrar toast de sucesso
+            toast.success('📡 Conectado à API - produtos atualizados!')
           } else {
-            throw new Error('API não disponível')
+            throw new Error('API retornou dados inválidos')
           }
         } catch (apiError) {
           console.log('📦 [HomePageML] API indisponível, usando dados de demonstração')

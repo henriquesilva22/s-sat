@@ -55,6 +55,7 @@ const corsOptions = {
       'https://s-saturno-affiliates.vercel.app',
       'https://frontend-2e5oupvd8-henrique-cardoso-silvas-projects.vercel.app',
       'https://frontend-8r3wqxwa0-henrique-cardoso-silvas-projects.vercel.app',
+      'https://frontend-qe35aaiba-henrique-cardoso-silvas-projects.vercel.app',
       process.env.CORS_ORIGIN
     ].filter(Boolean);
     
