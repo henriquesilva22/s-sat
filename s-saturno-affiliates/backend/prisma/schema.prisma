@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo para representar lojas afiliadas
+model Store {
+  id          Int       @id @default(autoincrement())
+  name        String    // Nome da loja (ex: "AliExpress", "Amazon BR")
+  description String?   // Descrição da loja
+  logoUrl     String?   // URL do logo da loja
+  domain      String?   // Domínio da loja (ex: "aliexpress.com")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relacionamento: Uma loja pode ter muitos produtos
+  products    Product[]
+  
+  @@map("stores")
+}
+
+// Modelo para categorias de produtos
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique // Nome da categoria (ex: "Eletrônicos", "Casa & Jardim")
+  description String?   // Descrição da categoria
+  slug        String    @unique // Slug para URLs (ex: "eletronicos", "casa-jardim")
+  color       String    @default("#6B7280") // Cor da categoria (hex)
+  icon        String?   // Nome do ícone (Lucide React)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relacionamento many-to-many com produtos
+  products    ProductCategory[]
+  
+  @@map("categories")
+}
+
+// Modelo para representar produtos afiliados
+model Product {
+  id           Int      @id @default(autoincrement())
+  title        String   // Título/nome do produto
+  description  String   // Descrição detalhada do produto
+  price        Float    // Preço do produto
+  originalPrice Float?  // Preço original (para mostrar desconto)
+  imageUrl     String   // URL da imagem do produto
+  affiliateUrl String   // URL de afiliado para onde redirecionar
+  stock        Int      @default(0) // Estoque (se aplicável)
+  tags         String   @default("") // Tags separadas por vírgula (ex: "eletrônicos,casa,jardim")
+  clicks       Int      @default(0) // Contador de cliques no produto
+  rating       Float?   // Avaliação média (1-5)
+  reviewCount  Int      @default(0) // Número de avaliações
+  soldCount    Int      @default(0) // Quantos foram vendidos
+  freeShipping Boolean  @default(true) // Se tem frete grátis
+  warranty     Boolean  @default(true) // Se tem garantia do vendedor
+  isActive     Boolean  @default(true) // Se o produto está ativo/visível
+  isFeatured   Boolean  @default(false) // Se é produto em destaque
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relacionamento: Cada produto pertence a uma loja
+  storeId      Int
+  store        Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  // Relacionamento many-to-many com categorias (máximo 4)
+  categories   ProductCategory[]
+  
+  @@map("products")
+}
+
+// Tabela de relacionamento many-to-many entre Product e Category
+model ProductCategory {
+  id         Int      @id @default(autoincrement())
+  productId  Int
+  categoryId Int
+  createdAt  DateTime @default(now())
+  
+  // Relacionamentos
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  
+  // Índice único para evitar duplicatas
+  @@unique([productId, categoryId])
+  @@map("product_categories")
+}
+
+// Modelo para rastrear cliques (opcional - alternativa ao campo clicks no Product)
+model ClickTracking {
+  id        Int      @id @default(autoincrement())
+  productId Int      // ID do produto clicado
+  ip        String?  // IP do usuário (para analytics)
+  userAgent String?  // User agent (para analytics)
+  clickedAt DateTime @default(now())
+  
+  @@map("click_tracking")
+}

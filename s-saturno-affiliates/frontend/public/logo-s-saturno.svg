@@ -1,0 +1,67 @@
+<svg width="600" height="150" viewBox="0 0 600 150" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradientes mais detalhados baseados na imagem -->
+    <radialGradient id="planetGradient" cx="45%" cy="35%">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="20%" stop-color="#553C9A"/>
+      <stop offset="50%" stop-color="#DC2626"/>
+      <stop offset="80%" stop-color="#EA580C"/>
+      <stop offset="100%" stop-color="#B91C1C"/>
+    </radialGradient>
+    
+    <linearGradient id="ringGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#DC2626"/>
+      <stop offset="30%" stop-color="#EA580C"/>
+      <stop offset="70%" stop-color="#F97316"/>
+      <stop offset="100%" stop-color="#DC2626"/>
+    </linearGradient>
+    
+    <linearGradient id="ringGradient2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="50%" stop-color="#DC2626"/>
+      <stop offset="100%" stop-color="#EA580C"/>
+    </linearGradient>
+    
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#374151"/>
+      <stop offset="25%" stop-color="#553C9A"/>
+      <stop offset="50%" stop-color="#1F2937"/>
+      <stop offset="75%" stop-color="#553C9A"/>
+      <stop offset="100%" stop-color="#374151"/>
+    </linearGradient>
+    
+    <!-- Sombra para o texto -->
+    <filter id="textShadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="1" flood-color="#00000040"/>
+    </filter>
+    
+    <!-- Brilho para o planeta -->
+    <filter id="planetGlow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Planeta principal -->
+  <ellipse cx="75" cy="75" rx="35" ry="35" fill="url(#planetGradient)" filter="url(#planetGlow)"/>
+  
+  <!-- Detalhes da superfície do planeta -->
+  <ellipse cx="60" cy="60" rx="8" ry="6" fill="#7C3AED" opacity="0.7"/>
+  <ellipse cx="85" cy="85" rx="6" ry="4" fill="#553C9A" opacity="0.6"/>
+  <ellipse cx="70" cy="90" rx="4" ry="3" fill="#DC2626" opacity="0.5"/>
+  
+  <!-- Sistema de anéis - múltiplos anéis como na imagem -->
+  <ellipse cx="75" cy="75" rx="55" ry="12" fill="none" stroke="url(#ringGradient1)" stroke-width="4" opacity="0.9" transform="rotate(-20 75 75)"/>
+  <ellipse cx="75" cy="75" rx="62" ry="10" fill="none" stroke="url(#ringGradient2)" stroke-width="3" opacity="0.8" transform="rotate(-20 75 75)"/>
+  <ellipse cx="75" cy="75" rx="68" ry="8" fill="none" stroke="url(#ringGradient1)" stroke-width="2" opacity="0.6" transform="rotate(-20 75 75)"/>
+  
+  <!-- Destaques dos anéis -->
+  <ellipse cx="75" cy="75" rx="55" ry="12" fill="none" stroke="#FFFFFF" stroke-width="1" opacity="0.4" transform="rotate(-20 75 75)"/>
+  <ellipse cx="75" cy="75" rx="62" ry="10" fill="none" stroke="#FFFFFF" stroke-width="0.8" opacity="0.3" transform="rotate(-20 75 75)"/>
+  
+  <!-- Texto S-SATURNO -->
+  <text x="170" y="90" font-family="Arial Black, Arial, sans-serif" font-size="42" font-weight="900" fill="url(#textGradient)" filter="url(#textShadow)">S-SATURNO</text>
+</svg>

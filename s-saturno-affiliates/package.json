@@ -1,0 +1,49 @@
+{
+  "name": "s-saturno-affiliates",
+  "version": "1.0.0",
+  "description": "Marketplace completo de afiliados S-Saturno - Backend e Frontend",
+  "main": "backend/src/server.js",
+  "scripts": {
+    "install:all": "npm run install:backend && npm run install:frontend",
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "start": "cd backend && npm start",
+    "db:setup": "cd backend && npm run db:generate && npm run db:push",
+    "db:seed": "cd backend && npm run db:seed",
+    "db:reset": "cd backend && npm run db:reset",
+    "setup": "npm run install:all && npm run db:setup && npm run db:seed",
+    "clean": "rm -rf backend/node_modules frontend/node_modules backend/dev.db backend/prisma/migrations",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "cd backend && npm run lint",
+    "lint:frontend": "cd frontend && npm run lint"
+  },
+  "keywords": [
+    "marketplace",
+    "affiliates",
+    "react",
+    "nodejs",
+    "express",
+    "prisma",
+    "sqlite",
+    "tailwindcss"
+  ],
+  "author": "S-Saturno Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/s-saturno/s-saturno-affiliates"
+  },
+  "bugs": {
+    "url": "https://github.com/s-saturno/s-saturno-affiliates/issues"
+  },
+  "homepage": "https://github.com/s-saturno/s-saturno-affiliates#readme"
+}
