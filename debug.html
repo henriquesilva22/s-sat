@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug - Teste API</title>
+</head>
+<body>
+    <h1>Teste de Conexão com API</h1>
+    <div id="results"></div>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        function log(message) {
+            console.log(message);
+            const div = document.createElement('div');
+            div.style.margin = '10px 0';
+            div.style.padding = '10px';
+            div.style.border = '1px solid #ccc';
+            div.innerHTML = message;
+            results.appendChild(div);
+        }
+        
+        async function testAPI() {
+            try {
+                log('🔄 Testando conexão com API...');
+                
+                const response = await fetch('http://localhost:3001/api/products');
+                log(`📊 Status: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                log(`✅ Sucesso! ${data.data?.length || 0} produtos encontrados`);
+                log(`📋 Primeiro produto: ${data.data?.[0]?.title || 'N/A'}`);
+                
+            } catch (error) {
+                log(`❌ Erro: ${error.message}`);
+                console.error('Erro completo:', error);
+            }
+        }
+        
+        // Testar imediatamente
+        testAPI();
+    </script>
+</body>
+</html>

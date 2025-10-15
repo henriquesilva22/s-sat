@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - S-Saturno Affiliates</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .status {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            margin: 20px 0;
+        }
+        .links {
+            margin-top: 30px;
+        }
+        .links a {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        .links a:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 S-Saturno Affiliates</h1>
+        <div class="status">✅ Sistema Funcionando</div>
+        
+        <h2>Servidores Ativos</h2>
+        <p><strong>Frontend:</strong> http://localhost:3000/ ou http://192.168.15.4:3000/</p>
+        <p><strong>Backend:</strong> http://localhost:3001/</p>
+        
+        <div class="links">
+            <h3>Links Disponíveis:</h3>
+            <a href="http://localhost:3000/">🏠 Marketplace</a>
+            <a href="http://localhost:3000/admin/login">🔐 Admin Login</a>
+            <a href="http://localhost:3000/admin">📊 Dashboard</a>
+            <a href="http://localhost:3001/">🔧 API</a>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <h3>🔑 Credenciais Admin:</h3>
+            <p><strong>Senha:</strong> <code style="background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 3px;">admin123</code></p>
+        </div>
+        
+        <div style="margin-top: 30px; font-size: 0.9em; opacity: 0.8;">
+            <p>Se você está vendo esta página, significa que pelo menos parte do sistema está funcionando.</p>
+            <p>Tente acessar os links acima ou usar o endereço de rede: <strong>192.168.15.4:3000</strong></p>
+        </div>
+    </div>
+    
+    <script>
+        // Teste de conectividade com a API
+        fetch('http://localhost:3001/')
+            .then(response => response.json())
+            .then(data => {
+                console.log('✅ API Backend conectada:', data);
+                document.getElementById('api-status').innerHTML = '✅ API Conectada';
+            })
+            .catch(error => {
+                console.log('❌ Erro na API:', error);
+                document.getElementById('api-status').innerHTML = '❌ API Desconectada';
+            });
+    </script>
+    
+    <div id="api-status" style="position: fixed; bottom: 20px; right: 20px; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px; font-size: 0.8em;"></div>
+</body>
+</html>
