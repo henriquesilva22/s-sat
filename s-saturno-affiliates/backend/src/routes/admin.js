@@ -4,6 +4,7 @@ const { PrismaClient } = require('@prisma/client');
 const { asyncHandler, authenticateToken, requireAdmin } = require('../middleware/auth');
 const { validateProduct, validateStore } = require('../middleware/validation');
 const { generateToken, sanitizeUrl, sanitizeString, formatTags, handlePrismaError } = require('../utils/helpers');
+const { uploadToCloudinary, deleteFromCloudinary } = require('../services/cloudinary');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -262,61 +263,26 @@ router.post('/products', authenticateToken, requireAdmin, validateProduct.create
     let processedImageUrl = imageUrl;
     console.log('🔍 [DEBUG] ImageUrl recebida:', imageUrl ? 'Base64 detectado' : 'Nenhuma imagem');
     if (imageUrl && imageUrl.startsWith('data:image/')) {
-      console.log('🔄 [DEBUG] Iniciando conversão de base64...');
+      console.log('☁️ [CLOUDINARY] Iniciando upload para Cloudinary...');
       try {
-        const fs = require('fs');
-        const path = require('path');
+        // Gerar nome único para o produto
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const publicId = `product-new-${uniqueSuffix}`;
         
-        // Extrair tipo e dados da imagem
-        const matches = imageUrl.match(/^data:image\/([a-zA-Z]+);base64,(.+)$/);
-        if (matches) {
-          const imageType = matches[1];
-          const imageBuffer = Buffer.from(matches[2], 'base64');
-          
-          // Gerar nome único
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-          const fileName = `product-new-${uniqueSuffix}.${imageType}`;
-          
-          // Criar diretório se não existir
-          const uploadDir = path.join(__dirname, '../../uploads/products');
-          if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-          }
-          
-          // Salvar arquivo
-          const filePath = path.join(uploadDir, fileName);
-          fs.writeFileSync(filePath, imageBuffer);
-          
-          // URL para acessar a imagem (URL completa do backend)
-          const baseUrl = process.env.NODE_ENV === 'production' 
-            ? 'https://s-sat.onrender.com' 
-            : `http://localhost:${process.env.PORT || 3001}`;
-          processedImageUrl = `${baseUrl}/uploads/products/${fileName}`;
-          
-          console.log('✅ [IMAGE CONVERT] Nova imagem base64 convertida para arquivo:', fileName);
-          console.log('🎯 [DEBUG] URL final gerada:', processedImageUrl);
-        }
+        // Upload para Cloudinary
+        processedImageUrl = await uploadToCloudinary(imageUrl, 'products', publicId);
+        
+        console.log('✅ [CLOUDINARY] Upload concluído:', processedImageUrl);
       } catch (error) {
-        console.error('❌ [IMAGE CONVERT] Erro ao converter nova imagem base64:', error);
+        console.error('❌ [CLOUDINARY] Erro no upload:', error);
         console.log('🔙 [DEBUG] Mantendo imageUrl original por causa do erro');
-        // Se falhar, manter a imagem base64 original
+        // Se falhar, manter a imagem base64 original (fallback)
       }
     }
-    
     console.log('📋 [DEBUG] processedImageUrl final:', processedImageUrl);
 
     // Sanitizar dados
-    let finalImageUrl = processedImageUrl;
-    
-    // Se a URL da imagem ainda for relativa, converter para URL completa
-    if (finalImageUrl && finalImageUrl.startsWith('/uploads/')) {
-      const baseUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://s-sat.onrender.com' 
-        : `http://localhost:${process.env.PORT || 3001}`;
-      finalImageUrl = `${baseUrl}${finalImageUrl}`;
-    }
-    
-    const sanitizedImageUrl = finalImageUrl?.startsWith('/uploads/') ? finalImageUrl : sanitizeUrl(finalImageUrl);
+    const sanitizedImageUrl = sanitizeUrl(processedImageUrl);
     const sanitizedAffiliateUrl = sanitizeUrl(affiliateUrl);
     
     const sanitizedData = {

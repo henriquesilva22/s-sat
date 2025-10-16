@@ -44,11 +44,12 @@ const validateProduct = {
     } else {
       const isValidUrl = validator.isURL(imageUrl);
       const isDataUrl = imageUrl.startsWith('data:image/');
+      const isCloudinaryUrl = imageUrl.includes('cloudinary.com');
       const isOurBackendUrl = imageUrl.startsWith('https://s-sat.onrender.com/uploads/') || 
                               imageUrl.startsWith('http://localhost:') ||
                               imageUrl.startsWith('/uploads/');
       
-      if (!isValidUrl && !isDataUrl && !isOurBackendUrl) {
+      if (!isValidUrl && !isDataUrl && !isCloudinaryUrl && !isOurBackendUrl) {
         errors.push('URL da imagem deve ser uma URL válida ou uma imagem em base64');
       }
     }
