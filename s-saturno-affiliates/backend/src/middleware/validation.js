@@ -11,6 +11,17 @@ const validateProduct = {
     const { title, description, price, imageUrl, affiliateUrl, storeId, stock } = req.body;
     const errors = [];
 
+    // DEBUG: Log completo dos dados recebidos
+    console.log('🔍 [VALIDATION CREATE DEBUG]', {
+      title: { value: title, type: typeof title },
+      description: { value: description?.substring?.(0, 50) + '...', type: typeof description },
+      price: { value: price, type: typeof price },
+      imageUrl: { length: imageUrl?.length, type: typeof imageUrl, starts: imageUrl?.substring?.(0, 50) + '...' },
+      affiliateUrl: { value: affiliateUrl, type: typeof affiliateUrl },
+      storeId: { value: storeId, type: typeof storeId },
+      stock: { value: stock, type: typeof stock }
+    });
+
     // Validação do título
     if (!title || typeof title !== 'string' || title.trim().length < 3) {
       errors.push('Título deve ter pelo menos 3 caracteres');
@@ -22,7 +33,8 @@ const validateProduct = {
     }
 
     // Validação do preço
-    if (!price || typeof price !== 'number' || price <= 0) {
+    const priceNum = typeof price === 'string' ? parseFloat(price) : price;
+    if (!price || isNaN(priceNum) || priceNum <= 0) {
       errors.push('Preço deve ser um número positivo');
     }
 
@@ -44,16 +56,21 @@ const validateProduct = {
     }
 
     // Validação do ID da loja
-    if (!storeId || !Number.isInteger(storeId) || storeId <= 0) {
+    const storeIdNum = typeof storeId === 'string' ? parseInt(storeId) : storeId;
+    if (!storeId || !Number.isInteger(storeIdNum) || storeIdNum <= 0) {
       errors.push('ID da loja deve ser um número inteiro positivo');
     }
 
     // Validação do estoque
-    if (stock !== undefined && (!Number.isInteger(stock) || stock < 0)) {
-      errors.push('Estoque deve ser um número inteiro não negativo');
+    if (stock !== undefined) {
+      const stockNum = typeof stock === 'string' ? parseInt(stock) : stock;
+      if (!Number.isInteger(stockNum) || stockNum < 0) {
+        errors.push('Estoque deve ser um número inteiro não negativo');
+      }
     }
 
     if (errors.length > 0) {
+      console.log('❌ [VALIDATION CREATE] Erros encontrados:', errors);
       return res.status(400).json({
         error: 'Dados inválidos',
         details: errors
