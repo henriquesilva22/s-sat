@@ -262,21 +262,34 @@ router.post('/products', authenticateToken, requireAdmin, validateProduct.create
     // Processar imagem se for base64
     let processedImageUrl = imageUrl;
     console.log('🔍 [DEBUG] ImageUrl recebida:', imageUrl ? 'Base64 detectado' : 'Nenhuma imagem');
+    
     if (imageUrl && imageUrl.startsWith('data:image/')) {
-      console.log('☁️ [CLOUDINARY] Iniciando upload para Cloudinary...');
+      console.log('☁️ [CLOUDINARY] Tentando upload para Cloudinary...');
       try {
-        // Gerar nome único para o produto
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const publicId = `product-new-${uniqueSuffix}`;
-        
-        // Upload para Cloudinary
-        processedImageUrl = await uploadToCloudinary(imageUrl, 'products', publicId);
-        
-        console.log('✅ [CLOUDINARY] Upload concluído:', processedImageUrl);
+        // Verificar se Cloudinary está configurado
+        if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY) {
+          // Gerar nome único para o produto
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+          const publicId = `product-new-${uniqueSuffix}`;
+          
+          // Upload para Cloudinary
+          processedImageUrl = await uploadToCloudinary(imageUrl, 'products', publicId);
+          console.log('✅ [CLOUDINARY] Upload concluído:', processedImageUrl);
+        } else {
+          console.log('⚠️ [CLOUDINARY] Não configurado, usando fallback');
+          throw new Error('Cloudinary não configurado');
+        }
       } catch (error) {
         console.error('❌ [CLOUDINARY] Erro no upload:', error);
-        console.log('🔙 [DEBUG] Mantendo imageUrl original por causa do erro');
-        // Se falhar, manter a imagem base64 original (fallback)
+        console.log('� [FALLBACK] Usando imagem de placeholder...');
+        
+        // Fallback: usar imagem de placeholder do Unsplash
+        const category = title?.toLowerCase().includes('iphone') ? 'phone' :
+                        title?.toLowerCase().includes('samsung') ? 'phone' :
+                        title?.toLowerCase().includes('notebook') ? 'laptop' :
+                        title?.toLowerCase().includes('headphone') ? 'headphones' : 'tech';
+        
+        processedImageUrl = `https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop&q=80`;
       }
     }
     console.log('📋 [DEBUG] processedImageUrl final:', processedImageUrl);
