@@ -287,8 +287,11 @@ router.post('/products', authenticateToken, requireAdmin, validateProduct.create
           const filePath = path.join(uploadDir, fileName);
           fs.writeFileSync(filePath, imageBuffer);
           
-          // URL para acessar a imagem (URL relativa)
-          processedImageUrl = `/uploads/products/${fileName}`;
+          // URL para acessar a imagem (URL completa do backend)
+          const baseUrl = process.env.NODE_ENV === 'production' 
+            ? 'https://s-sat.onrender.com' 
+            : `http://localhost:${process.env.PORT || 3001}`;
+          processedImageUrl = `${baseUrl}/uploads/products/${fileName}`;
           
           console.log('✅ [IMAGE CONVERT] Nova imagem base64 convertida para arquivo:', fileName);
           console.log('🎯 [DEBUG] URL final gerada:', processedImageUrl);
@@ -303,7 +306,17 @@ router.post('/products', authenticateToken, requireAdmin, validateProduct.create
     console.log('📋 [DEBUG] processedImageUrl final:', processedImageUrl);
 
     // Sanitizar dados
-    const sanitizedImageUrl = processedImageUrl?.startsWith('/uploads/') ? processedImageUrl : sanitizeUrl(processedImageUrl);
+    let finalImageUrl = processedImageUrl;
+    
+    // Se a URL da imagem ainda for relativa, converter para URL completa
+    if (finalImageUrl && finalImageUrl.startsWith('/uploads/')) {
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://s-sat.onrender.com' 
+        : `http://localhost:${process.env.PORT || 3001}`;
+      finalImageUrl = `${baseUrl}${finalImageUrl}`;
+    }
+    
+    const sanitizedImageUrl = finalImageUrl?.startsWith('/uploads/') ? finalImageUrl : sanitizeUrl(finalImageUrl);
     const sanitizedAffiliateUrl = sanitizeUrl(affiliateUrl);
     
     const sanitizedData = {

@@ -44,8 +44,11 @@ const validateProduct = {
     } else {
       const isValidUrl = validator.isURL(imageUrl);
       const isDataUrl = imageUrl.startsWith('data:image/');
+      const isOurBackendUrl = imageUrl.startsWith('https://s-sat.onrender.com/uploads/') || 
+                              imageUrl.startsWith('http://localhost:') ||
+                              imageUrl.startsWith('/uploads/');
       
-      if (!isValidUrl && !isDataUrl) {
+      if (!isValidUrl && !isDataUrl && !isOurBackendUrl) {
         errors.push('URL da imagem deve ser uma URL válida ou uma imagem em base64');
       }
     }

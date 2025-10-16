@@ -18,6 +18,7 @@ import AdminHeader from '../components/AdminHeader';
 import FooterML from '../components/FooterML';
 import CategorySelector from '../components/CategorySelector';
 import ImageUpload from '../components/ImageUploadSimple';
+import { adminAPI } from '../services/api';
 import { useAuth, useAdmin } from '../hooks/useAdmin';
 import { formatPrice, formatDate, formatNumber } from '../utils/helpers';
 import toast from 'react-hot-toast';
@@ -27,6 +28,10 @@ import '../styles/admin-header.css';
  * Página principal do painel administrativo
  */
 const AdminDashboard = () => {
+  // API URL for production
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+    (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://s-sat.onrender.com');
+  
   const { isAuthenticated, loading: authLoading } = useAuth();
   const {
     dashboard,
@@ -160,7 +165,7 @@ const AdminDashboard = () => {
       console.log('Token encontrado:', token ? 'Sim' : 'Não');
       console.log('Dados da loja:', newStore);
       
-      const response = await fetch('http://localhost:3001/api/admin/stores', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/stores`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -243,8 +248,25 @@ const AdminDashboard = () => {
       console.log('🔍 [DEBUG] imageUrl tamanho:', newProduct.imageUrl?.length || 0);
       console.log('🔍 [DEBUG] Token presente:', !!token);
       console.log('🔍 [DEBUG] selectedCategories:', selectedCategories);
+      
+      // DEBUG DETALHADO - Valores exatos sendo enviados
+      console.log('📋 [VALORES EXATOS]', {
+        title: productData.title,
+        description: productData.description,
+        price: productData.price,
+        originalPrice: productData.originalPrice,
+        storeId: productData.storeId,
+        rating: productData.rating,
+        reviewCount: productData.reviewCount,
+        soldCount: productData.soldCount,
+        freeShipping: productData.freeShipping,
+        warranty: productData.warranty,
+        categoryIds: productData.categoryIds,
+        affiliateUrl: productData.affiliateUrl,
+        imageUrl: productData.imageUrl ? 'Base64 presente' : 'Vazio'
+      });
 
-      const response = await fetch('http://localhost:3001/api/admin/products', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/products`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -334,7 +356,7 @@ const AdminDashboard = () => {
     e.preventDefault();
     
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/stores/${editStore.id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/stores/${editStore.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -429,11 +451,11 @@ const AdminDashboard = () => {
       console.log('🔄 [FRONTEND] Enviando dados para update:', {
         productId: editProduct.id,
         productData,
-        url: `http://localhost:3001/api/admin/products/${editProduct.id}`,
+        url: `${API_BASE_URL}/api/admin/products/${editProduct.id}`,
         token: localStorage.getItem('adminToken') ? 'Token presente' : 'Token ausente'
       });
 
-      const response = await fetch(`http://localhost:3001/api/admin/products/${editProduct.id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/products/${editProduct.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -501,7 +523,7 @@ const AdminDashboard = () => {
   // Carregar categorias
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/categories', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/categories`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         }
@@ -521,7 +543,7 @@ const AdminDashboard = () => {
     e.preventDefault();
     
     try {
-      const response = await fetch('http://localhost:3001/api/admin/categories', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/categories`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -741,11 +763,11 @@ const AdminDashboard = () => {
                           <div className="flex items-center">
                             <img
                               className="h-10 w-10 rounded object-cover"
-                              src={product.imageUrl?.replace('http://localhost:3001', '') || product.imageUrl}
+                              src={product.imageUrl}
                               alt={product.title}
                               onError={(e) => {
                                 console.error('❌ [IMG ERROR] Falha ao carregar imagem:', product.imageUrl);
-                                console.error('❌ [IMG ERROR] URL processada:', product.imageUrl?.replace('http://localhost:3001', '') || product.imageUrl);
+                                console.error('❌ [IMG ERROR] URL processada:', product.imageUrl);
                                 e.target.src = 'https://via.placeholder.com/40x40/e5e7eb/9ca3af?text=?';
                               }}
                               onLoad={(e) => {
