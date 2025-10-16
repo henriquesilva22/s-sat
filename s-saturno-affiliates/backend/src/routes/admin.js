@@ -477,38 +477,27 @@ router.put('/products/:id', authenticateToken, requireAdmin, validateProduct.upd
     // Processar imagem se for base64
     let processedImageUrl = updateData.imageUrl;
     if (updateData.imageUrl && updateData.imageUrl.startsWith('data:image/')) {
+      console.log('☁️ [CLOUDINARY UPDATE] Tentando upload para Cloudinary...');
       try {
-        const fs = require('fs');
-        const path = require('path');
-        
-        // Extrair tipo e dados da imagem
-        const matches = updateData.imageUrl.match(/^data:image\/([a-zA-Z]+);base64,(.+)$/);
-        if (matches) {
-          const imageType = matches[1];
-          const imageBuffer = Buffer.from(matches[2], 'base64');
-          
-          // Gerar nome único
+        // Verificar se Cloudinary está configurado
+        if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY) {
+          // Gerar nome único para o produto
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-          const fileName = `product-${productId}-${uniqueSuffix}.${imageType}`;
+          const publicId = `product-${productId}-${uniqueSuffix}`;
           
-          // Criar diretório se não existir
-          const uploadDir = path.join(__dirname, '../../uploads/products');
-          if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-          }
-          
-          // Salvar arquivo
-          const filePath = path.join(uploadDir, fileName);
-          fs.writeFileSync(filePath, imageBuffer);
-          
-          // URL para acessar a imagem (URL relativa)
-          processedImageUrl = `/uploads/products/${fileName}`;
-          
-          console.log('✅ [IMAGE CONVERT] Imagem base64 convertida para arquivo:', fileName);
+          // Upload para Cloudinary
+          processedImageUrl = await uploadToCloudinary(updateData.imageUrl, 'products', publicId);
+          console.log('✅ [CLOUDINARY UPDATE] Upload concluído:', processedImageUrl);
+        } else {
+          console.log('⚠️ [CLOUDINARY UPDATE] Não configurado, usando fallback');
+          throw new Error('Cloudinary não configurado');
         }
       } catch (error) {
-        console.error('❌ [IMAGE CONVERT] Erro ao converter imagem base64:', error);
-        // Se falhar, manter a imagem base64 original
+        console.error('❌ [CLOUDINARY UPDATE] Erro no upload:', error);
+        console.log('🔄 [FALLBACK UPDATE] Usando imagem de placeholder...');
+        
+        // Fallback: usar imagem de placeholder do Unsplash
+        processedImageUrl = `https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop&q=80`;
       }
     }
 
@@ -720,39 +709,21 @@ router.post('/stores', authenticateToken, requireAdmin, validateStore.create, as
     // Processar logo se for base64
     let processedLogoUrl = logoUrl;
     if (logoUrl && logoUrl.startsWith('data:image/')) {
-      console.log('🔄 [STORE LOGO] Convertendo logo base64 para arquivo...');
+      console.log('☁️ [CLOUDINARY STORE] Tentando upload de logo para Cloudinary...');
       try {
-        const fs = require('fs');
-        const path = require('path');
-        
-        // Extrair tipo e dados da imagem
-        const matches = logoUrl.match(/^data:image\/([a-zA-Z]+);base64,(.+)$/);
-        if (matches) {
-          const imageType = matches[1];
-          const imageBuffer = Buffer.from(matches[2], 'base64');
-          
-          // Gerar nome único
+        if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY) {
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-          const fileName = `store-logo-${uniqueSuffix}.${imageType}`;
-          
-          // Criar diretório se não existir
-          const uploadDir = path.join(__dirname, '../../uploads/stores');
-          if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-          }
-          
-          // Salvar arquivo
-          const filePath = path.join(uploadDir, fileName);
-          fs.writeFileSync(filePath, imageBuffer);
-          
-          // URL para acessar a imagem (URL relativa)
-          processedLogoUrl = `/uploads/stores/${fileName}`;
-          
-          console.log('✅ [STORE LOGO] Logo convertido para arquivo:', fileName);
+          const publicId = `store-logo-${uniqueSuffix}`;
+          processedLogoUrl = await uploadToCloudinary(logoUrl, 'stores', publicId);
+          console.log('✅ [CLOUDINARY STORE] Upload concluído:', processedLogoUrl);
+        } else {
+          console.log('⚠️ [CLOUDINARY STORE] Não configurado, usando fallback');
+          throw new Error('Cloudinary não configurado');
         }
       } catch (error) {
-        console.error('❌ [STORE LOGO] Erro ao converter logo base64:', error);
-        // Se falhar, manter o logo base64 original
+        console.error('❌ [CLOUDINARY STORE] Erro no upload:', error);
+        console.log('🔄 [FALLBACK STORE] Usando logo de placeholder...');
+        processedLogoUrl = `https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=400&h=400&fit=crop&q=80`;
       }
     }
 
@@ -820,39 +791,21 @@ router.put('/stores/:id', authenticateToken, requireAdmin, asyncHandler(async (r
     // Processar logo se for base64
     let processedLogoUrl = updateData.logoUrl;
     if (updateData.logoUrl && updateData.logoUrl.startsWith('data:image/')) {
-      console.log('🔄 [STORE LOGO UPDATE] Convertendo logo base64 para arquivo...');
+      console.log('☁️ [CLOUDINARY STORE UPDATE] Tentando upload de logo para Cloudinary...');
       try {
-        const fs = require('fs');
-        const path = require('path');
-        
-        // Extrair tipo e dados da imagem
-        const matches = updateData.logoUrl.match(/^data:image\/([a-zA-Z]+);base64,(.+)$/);
-        if (matches) {
-          const imageType = matches[1];
-          const imageBuffer = Buffer.from(matches[2], 'base64');
-          
-          // Gerar nome único
+        if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY) {
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-          const fileName = `store-${storeId}-${uniqueSuffix}.${imageType}`;
-          
-          // Criar diretório se não existir
-          const uploadDir = path.join(__dirname, '../../uploads/stores');
-          if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-          }
-          
-          // Salvar arquivo
-          const filePath = path.join(uploadDir, fileName);
-          fs.writeFileSync(filePath, imageBuffer);
-          
-          // URL para acessar a imagem (URL relativa)
-          processedLogoUrl = `/uploads/stores/${fileName}`;
-          
-          console.log('✅ [STORE LOGO UPDATE] Logo atualizado para arquivo:', fileName);
+          const publicId = `store-${storeId}-${uniqueSuffix}`;
+          processedLogoUrl = await uploadToCloudinary(updateData.logoUrl, 'stores', publicId);
+          console.log('✅ [CLOUDINARY STORE UPDATE] Upload concluído:', processedLogoUrl);
+        } else {
+          console.log('⚠️ [CLOUDINARY STORE UPDATE] Não configurado, usando fallback');
+          throw new Error('Cloudinary não configurado');
         }
       } catch (error) {
-        console.error('❌ [STORE LOGO UPDATE] Erro ao converter logo base64:', error);
-        // Se falhar, manter o logo base64 original
+        console.error('❌ [CLOUDINARY STORE UPDATE] Erro no upload:', error);
+        console.log('🔄 [FALLBACK STORE UPDATE] Usando logo de placeholder...');
+        processedLogoUrl = `https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=400&h=400&fit=crop&q=80`;
       }
     }
 
