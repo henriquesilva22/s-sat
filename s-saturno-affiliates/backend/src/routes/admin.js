@@ -271,7 +271,7 @@ router.get('/products', authenticateToken, requireAdmin, asyncHandler(async (req
  * Criar novo produto
  */
 router.post('/products', authenticateToken, requireAdmin, validateProduct.create, asyncHandler(async (req, res) => {
-  const { title, description, price, imageUrl, affiliateUrl, storeId, stock = 0, tags = '', isActive = true, categoryIds = [], rating, reviewCount, soldCount, freeShipping, warranty } = req.body;
+  const { title, description, price, originalPrice = null, imageUrl, affiliateUrl, storeId, stock = 0, tags = '', isActive = true, categoryIds = [], rating, reviewCount, soldCount, freeShipping, warranty } = req.body;
 
   try {
     // Validar categorias (máximo 4)
@@ -363,6 +363,7 @@ router.post('/products', authenticateToken, requireAdmin, validateProduct.create
       title: sanitizeString(title),
       description: sanitizeString(description),
       price: parseFloat(price),
+      originalPrice: originalPrice === null || originalPrice === '' ? null : parseFloat(originalPrice),
       imageUrl: sanitizedImageUrl !== null ? sanitizedImageUrl : '',
       affiliateUrl: sanitizedAffiliateUrl !== null ? sanitizedAffiliateUrl : '',
       storeId: parseInt(storeId),
