@@ -1,3 +1,59 @@
+/**
+ * POST /api/admin/cleanup-images
+ * Remove todas as imagens dos produtos e lojas do banco e do Cloudinary
+ */
+router.post('/cleanup-images', authenticateToken, requireAdmin, asyncHandler(async (req, res) => {
+  let cleanedProducts = 0;
+  let cleanedStores = 0;
+  let cloudinaryDeleted = 0;
+  let cloudinaryErrors = 0;
+
+  // Limpar imagens dos produtos
+  const products = await prisma.product.findMany({ select: { id: true, imageUrl: true } });
+  for (const product of products) {
+    if (product.imageUrl) {
+      // Tenta deletar do Cloudinary se for URL do Cloudinary
+      if (product.imageUrl.includes('cloudinary.com')) {
+        try {
+          const deleted = await deleteFromCloudinary(product.imageUrl);
+          if (deleted) cloudinaryDeleted++;
+          else cloudinaryErrors++;
+        } catch (err) {
+          cloudinaryErrors++;
+        }
+      }
+      await prisma.product.update({ where: { id: product.id }, data: { imageUrl: null } });
+      cleanedProducts++;
+    }
+  }
+
+  // Limpar imagens das lojas
+  const stores = await prisma.store.findMany({ select: { id: true, logoUrl: true } });
+  for (const store of stores) {
+    if (store.logoUrl) {
+      if (store.logoUrl.includes('cloudinary.com')) {
+        try {
+          const deleted = await deleteFromCloudinary(store.logoUrl);
+          if (deleted) cloudinaryDeleted++;
+          else cloudinaryErrors++;
+        } catch (err) {
+          cloudinaryErrors++;
+        }
+      }
+      await prisma.store.update({ where: { id: store.id }, data: { logoUrl: null } });
+      cleanedStores++;
+    }
+  }
+
+  res.json({
+    success: true,
+    message: 'Imagens limpas com sucesso',
+    cleanedProducts,
+    cleanedStores,
+    cloudinaryDeleted,
+    cloudinaryErrors
+  });
+}));
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const { PrismaClient } = require('@prisma/client');
@@ -159,7 +215,16 @@ router.get('/dashboard', authenticateToken, requireAdmin, asyncHandler(async (re
  */
 router.get('/products', authenticateToken, requireAdmin, asyncHandler(async (req, res) => {
   try {
+    const { storeId } = req.query;
+    const where = {};
+    if (storeId) {
+      const parsedStoreId = parseInt(storeId);
+      if (!isNaN(parsedStoreId)) {
+        where.storeId = parsedStoreId;
+      }
+    }
     const products = await prisma.product.findMany({
+      where,
       include: {
         store: {
           select: {
@@ -193,7 +258,6 @@ router.get('/products', authenticateToken, requireAdmin, asyncHandler(async (req
   } catch (error) {
     console.error('Erro ao listar produtos:', error);
     const { status, message, details } = handlePrismaError(error);
-    
     res.status(status).json({
       success: false,
       error: message,
@@ -259,38 +323,35 @@ router.post('/products', authenticateToken, requireAdmin, validateProduct.create
       });
     }
 
-    // Processar imagem se for base64
+    // Processar imagem se for base64 ou URL inválida
     let processedImageUrl = imageUrl;
-    console.log('🔍 [DEBUG] ImageUrl recebida:', imageUrl ? 'Base64 detectado' : 'Nenhuma imagem');
-    
+    console.log('🔍 [DEBUG] ImageUrl recebida:', imageUrl ? 'Base64 detectado ou URL recebida' : 'Nenhuma imagem');
+
+    // Função para checar se é URL direta de imagem
+    function isDirectImageUrl(url) {
+      return typeof url === 'string' && /\.(jpg|jpeg|png|webp|gif|bmp|svg)(\?.*)?$/i.test(url);
+    }
+
     if (imageUrl && imageUrl.startsWith('data:image/')) {
       console.log('☁️ [CLOUDINARY] Tentando upload para Cloudinary...');
       try {
-        // Verificar se Cloudinary está configurado
         if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY) {
-          // Gerar nome único para o produto
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
           const publicId = `product-new-${uniqueSuffix}`;
-          
-          // Upload para Cloudinary
           processedImageUrl = await uploadToCloudinary(imageUrl, 'products', publicId);
           console.log('✅ [CLOUDINARY] Upload concluído:', processedImageUrl);
         } else {
-          console.log('⚠️ [CLOUDINARY] Não configurado, usando fallback');
+          console.log('⚠️ [CLOUDINARY] Não configurado, imagem não será salva');
           throw new Error('Cloudinary não configurado');
         }
       } catch (error) {
         console.error('❌ [CLOUDINARY] Erro no upload:', error);
-        console.log('� [FALLBACK] Usando imagem de placeholder...');
-        
-        // Fallback: usar imagem de placeholder do Unsplash
-        const category = title?.toLowerCase().includes('iphone') ? 'phone' :
-                        title?.toLowerCase().includes('samsung') ? 'phone' :
-                        title?.toLowerCase().includes('notebook') ? 'laptop' :
-                        title?.toLowerCase().includes('headphone') ? 'headphones' : 'tech';
-        
-        processedImageUrl = `https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop&q=80`;
+        processedImageUrl = '';
       }
+    } else if (imageUrl && !isDirectImageUrl(imageUrl)) {
+      // Se não for URL direta de imagem, não salva nada
+      console.log('⚠️ [IMG URL] URL não é direta de imagem, campo ficará vazio');
+      processedImageUrl = '';
     }
     console.log('📋 [DEBUG] processedImageUrl final:', processedImageUrl);
 
@@ -474,31 +535,35 @@ router.put('/products/:id', authenticateToken, requireAdmin, validateProduct.upd
       }
     }
 
-    // Processar imagem se for base64
+    // Processar imagem se for base64 ou URL inválida
     let processedImageUrl = updateData.imageUrl;
+    function isDirectImageUrl(url) {
+      return typeof url === 'string' && /\.(jpg|jpeg|png|webp|gif|bmp|svg)(\?.*)?$/i.test(url);
+    }
+    // Função para checar se é URL direta de imagem
+    function isDirectImageUrl(url) {
+      return typeof url === 'string' && /\.(jpg|jpeg|png|webp|gif|bmp|svg)(\?.*)?$/i.test(url);
+    }
     if (updateData.imageUrl && updateData.imageUrl.startsWith('data:image/')) {
       console.log('☁️ [CLOUDINARY UPDATE] Tentando upload para Cloudinary...');
       try {
-        // Verificar se Cloudinary está configurado
         if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY) {
-          // Gerar nome único para o produto
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
           const publicId = `product-${productId}-${uniqueSuffix}`;
-          
-          // Upload para Cloudinary
           processedImageUrl = await uploadToCloudinary(updateData.imageUrl, 'products', publicId);
           console.log('✅ [CLOUDINARY UPDATE] Upload concluído:', processedImageUrl);
         } else {
-          console.log('⚠️ [CLOUDINARY UPDATE] Não configurado, usando fallback');
+          console.log('⚠️ [CLOUDINARY UPDATE] Não configurado, imagem não será salva');
           throw new Error('Cloudinary não configurado');
         }
       } catch (error) {
         console.error('❌ [CLOUDINARY UPDATE] Erro no upload:', error);
-        console.log('🔄 [FALLBACK UPDATE] Usando imagem de placeholder...');
-        
-        // Fallback: usar imagem de placeholder do Unsplash
-        processedImageUrl = `https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=400&fit=crop&q=80`;
+        processedImageUrl = '';
       }
+    } else if (updateData.imageUrl && !isDirectImageUrl(updateData.imageUrl)) {
+      // Se não for URL direta de imagem, não salva nada
+      console.log('⚠️ [IMG URL UPDATE] URL não é direta de imagem, campo ficará vazio');
+      processedImageUrl = '';
     }
 
     // Sanitizar dados de atualização

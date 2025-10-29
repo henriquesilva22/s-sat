@@ -766,9 +766,12 @@ const AdminDashboard = () => {
                               src={product.imageUrl}
                               alt={product.title}
                               onError={(e) => {
-                                console.error('❌ [IMG ERROR] Falha ao carregar imagem:', product.imageUrl);
-                                console.error('❌ [IMG ERROR] URL processada:', product.imageUrl);
-                                e.target.src = 'https://via.placeholder.com/40x40/e5e7eb/9ca3af?text=?';
+                                // Evita loop infinito de fallback
+                                if (!e.target.dataset.fallback) {
+                                  console.error('❌ [IMG ERROR] Falha ao carregar imagem:', product.imageUrl);
+                                  e.target.src = 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=40&h=40&fit=crop&q=80';
+                                  e.target.dataset.fallback = 'true';
+                                }
                               }}
                               onLoad={(e) => {
                                 console.log('✅ [IMG OK] Imagem carregada:', product.imageUrl);
