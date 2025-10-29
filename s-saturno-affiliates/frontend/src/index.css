@@ -16,6 +16,25 @@
     @apply bg-gray-50 text-gray-900 antialiased;
     line-height: 1.6;
   }
+
+  /* Modo de fundo preto simples (toggle via class 'bg-black-mode' no body) */
+  body.bg-black-mode {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+  }
+
+  /* Ajustes visuais para elementos de cartão quando em modo preto */
+  body.bg-black-mode .card,
+  body.bg-black-mode .card-hover {
+    background-color: #0b0b0b !important;
+    color: #e5e7eb !important;
+    border-color: rgba(255,255,255,0.05) !important;
+  }
+
+  body.bg-black-mode .btn-primary {
+    background-color: #2563EB !important;
+    color: #ffffff !important;
+  }
   
   /* Scrollbar customizada para WebKit */
   ::-webkit-scrollbar {

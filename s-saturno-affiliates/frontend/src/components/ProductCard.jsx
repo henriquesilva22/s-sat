@@ -1,7 +1,7 @@
 import React from 'react';
 import { ExternalLink, Eye } from 'lucide-react';
 import { formatPrice, truncateText, extractDomain } from '../utils/helpers';
-import { productsAPI } from '../services/api';
+import { productsAPI, API_BASE_URL } from '../services/api';
 
 /**
  * Componente ProductCard - Card de produto estilo Mercado Livre
@@ -54,7 +54,13 @@ const ProductCard = ({ product, onClick, className = '' }) => {
       {/* Imagem do produto */}
       <div className="relative mb-4 overflow-hidden rounded-lg">
         <img
-          src={product.imageUrl?.replace('http://localhost:3001', '') || product.imageUrl}
+          src={
+            product.imageUrl
+              ? (product.imageUrl.startsWith(API_BASE_URL)
+                  ? product.imageUrl.replace(API_BASE_URL, '')
+                  : product.imageUrl)
+              : undefined
+          }
           alt={product.title}
           className="w-full h-48 sm:h-56 object-cover group-hover:scale-105 transition-transform duration-300"
           onError={handleImageError}

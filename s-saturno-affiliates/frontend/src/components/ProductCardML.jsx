@@ -1,6 +1,7 @@
 import { Star, Truck, Shield, Heart, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react'
 import { useState } from 'react'
 import { useFavorites } from '../contexts/FavoritesContext'
+import { API_BASE_URL } from '../services/api'
 
 const ProductCardML = ({ product }) => {
   const { toggleFavorite, isFavorite } = useFavorites();
@@ -37,7 +38,13 @@ const ProductCardML = ({ product }) => {
       {/* Product Image */}
       <div className="relative overflow-hidden">
         <img
-          src={product.imageUrl?.replace('http://localhost:3001', '') || '/placeholder-image.jpg'}
+          src={
+            (product.imageUrl
+              ? (product.imageUrl.startsWith(API_BASE_URL)
+                  ? product.imageUrl.replace(API_BASE_URL, '')
+                  : product.imageUrl)
+              : null) || '/placeholder-image.jpg'
+          }
           alt={product.title || 'Produto'}
           className="w-full h-36 sm:h-40 md:h-44 lg:h-40 xl:h-44 object-cover group-hover:scale-105 transition-transform duration-300"
           onError={(e) => {
@@ -134,8 +141,12 @@ const ProductCardML = ({ product }) => {
         {product.store && (
           <div className="hidden sm:flex items-center gap-2 mb-3 text-sm text-gray-600">
             {product.store.logoUrl && (
-              <img 
-                src={product.store.logoUrl?.replace('http://localhost:3001', '') || '/placeholder-store.jpg'} 
+                <img 
+                src={(product.store.logoUrl
+                  ? (product.store.logoUrl.startsWith(API_BASE_URL)
+                      ? product.store.logoUrl.replace(API_BASE_URL, '')
+                      : product.store.logoUrl)
+                  : null) || '/placeholder-store.jpg'} 
                 alt={product.store.name}
                 className="w-4 h-4 object-contain"
                 onError={(e) => {
@@ -196,7 +207,11 @@ const ProductCardML = ({ product }) => {
                 <div className="flex items-center gap-1">
                   {product.store.logoUrl && (
                     <img 
-                      src={product.store.logoUrl?.replace('http://localhost:3001', '') || '/placeholder-store.jpg'} 
+                      src={(product.store.logoUrl
+                        ? (product.store.logoUrl.startsWith(API_BASE_URL)
+                            ? product.store.logoUrl.replace(API_BASE_URL, '')
+                            : product.store.logoUrl)
+                        : null) || '/placeholder-store.jpg'} 
                       alt={product.store.name}
                       className="w-4 h-4 object-contain"
                       onError={(e) => {

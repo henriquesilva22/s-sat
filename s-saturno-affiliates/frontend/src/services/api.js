@@ -1,8 +1,10 @@
 import axios from 'axios';
 
 // Configuração base da API
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-  (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://s-sat.onrender.com');
+// Prefer explicit VITE_API_BASE_URL. If not provided and we're not on localhost,
+// use window.location.origin as a sensible default (assumes API is same-origin or proxied).
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+  (window.location.hostname === 'localhost' ? 'http://localhost:3001' : `${window.location.protocol}//${window.location.hostname}`);
 
 // Criar instância do axios
 const api = axios.create({
@@ -17,37 +19,36 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('adminToken');
-    const fullStorage = { ...localStorage };
-    
-    // DEBUG: Log do token com mais detalhes
-    console.log('🔑 [API DEBUG]', {
-      url: config.url,
-      method: config.method,
-      hasToken: !!token,
-      tokenType: typeof token,
-      tokenValue: token,
-      tokenPreview: token && token !== 'null' ? `${token.substring(0, 30)}...` : 'Inválido/Null',
-      localStorageKeys: Object.keys(fullStorage),
-      timestamp: new Date().toISOString()
-    });
-    
-    // Verificação adicional para requisições PUT/POST
-    if (config.method?.toLowerCase() === 'put' || config.method?.toLowerCase() === 'post') {
-      console.log('🚨 [CRITICAL DEBUG] Requisição PUT/POST:', {
+
+    // Only output verbose debug info during development
+    if (import.meta.env.DEV) {
+      console.debug('🔑 [API DEBUG]', {
         url: config.url,
-        token: token,
-        tokenIsNull: token === null,
-        tokenIsStringNull: token === 'null',
-        authHeader: config.headers.Authorization
+        method: config.method,
+        hasToken: !!token,
+        tokenPreview: token && token !== 'null' ? `${token.substring(0, 30)}...` : token,
+        timestamp: new Date().toISOString()
       });
+
+      // Extra debug for write requests
+      if (config.method?.toLowerCase() === 'put' || config.method?.toLowerCase() === 'post') {
+        console.debug('🚨 [CRITICAL DEBUG] Requisição PUT/POST:', {
+          url: config.url,
+          tokenIsNull: token === null,
+          tokenIsStringNull: token === 'null',
+          authHeader: config.headers.Authorization
+        });
+      }
     }
-    
-    // Validação mais rigorosa do token
+
+    // Set Authorization header only when token looks valid
     if (token && token !== 'null' && token !== 'undefined' && token.length > 10) {
       config.headers.Authorization = `Bearer ${token}`;
     } else {
-      console.error('🚨 [TOKEN ERROR] Token inválido detectado:', token);
-      // Limpar token inválido
+      // In prod do not spam console with token errors; just quietly remove invalid token
+      if (import.meta.env.DEV) {
+        console.warn('🚨 [TOKEN ERROR] Token inválido detectado:', token);
+      }
       localStorage.removeItem('adminToken');
     }
     return config;

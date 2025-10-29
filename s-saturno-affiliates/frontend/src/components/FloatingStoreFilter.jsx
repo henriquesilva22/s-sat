@@ -1,24 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Store, ChevronDown, ChevronUp } from 'lucide-react';
 import './FloatingStoreFilter.css';
+import { storesAPI } from '../services/api';
 
 const FloatingStoreFilter = ({ onStoreFilter }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Fetch stores from API
   useEffect(() => {
     const fetchStores = async () => {
       setLoading(true);
+      setError(null);
       try {
-        const response = await fetch('http://localhost:3001/api/stores');
-        if (response.ok) {
-          const data = await response.json();
-          setStores(data.data || []);
-        }
-      } catch (error) {
-        console.error('Erro ao carregar lojas:', error);
+        const data = await storesAPI.getStores();
+        setStores(data.data || []);
+      } catch (err) {
+        // Friendly error handling for UI
+        console.warn('Erro ao carregar lojas:', err.message || err);
+        setError('Não foi possível carregar as lojas no momento. Tente novamente mais tarde.');
       } finally {
         setLoading(false);
       }
@@ -67,6 +69,20 @@ const FloatingStoreFilter = ({ onStoreFilter }) => {
           <div className="store-list">
             {loading ? (
               <div className="store-loading">Carregando lojas...</div>
+            ) : error ? (
+              <div className="store-error">
+                <div>{error}</div>
+                <button className="retry-btn" onClick={() => {
+                  setError(null);
+                  setLoading(true);
+                  // re-fetch
+                  storesAPI.getStores().then(d => {
+                    setStores(d.data || []);
+                  }).catch(e => {
+                    setError('Não foi possível carregar as lojas no momento. Tente novamente mais tarde.');
+                  }).finally(() => setLoading(false));
+                }}>Tentar novamente</button>
+              </div>
             ) : stores.length > 0 ? (
               stores.map((store) => (
                 <button

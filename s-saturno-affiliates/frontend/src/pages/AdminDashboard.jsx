@@ -28,9 +28,7 @@ import '../styles/admin-header.css';
  * Página principal do painel administrativo
  */
 const AdminDashboard = () => {
-  // API URL for production
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-    (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://s-sat.onrender.com');
+  // NOTE: use adminAPI for requests; no need for manual base URL handling here
   
   const { isAuthenticated, loading: authLoading } = useAuth();
   const {
@@ -161,31 +159,17 @@ const AdminDashboard = () => {
     e.preventDefault();
     
     try {
-      const token = localStorage.getItem('adminToken');
-      console.log('Token encontrado:', token ? 'Sim' : 'Não');
+      // Use adminAPI which already aplica token e baseURL via axios
       console.log('Dados da loja:', newStore);
-      
-      const response = await fetch(`${API_BASE_URL}/api/admin/stores`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(newStore)
-      });
-      
-      console.log('Response status:', response.status);
-      console.log('Response headers:', [...response.headers.entries()]);
+      const result = await adminAPI.createStore(newStore);
 
-      if (response.ok) {
+      if (result && result.success) {
         toast.success('Loja criada com sucesso!');
         setShowNewStoreModal(false);
         setNewStore({ name: '', domain: '', logoUrl: '' });
         fetchAdminStores(); // Recarregar lista
       } else {
-        const error = await response.json();
-        console.error('Erro detalhado:', error);
-        const errorMessage = error.details ? error.details.join(', ') : error.error || error.message || 'Erro ao criar loja';
+        const errorMessage = result?.error || result?.message || 'Erro ao criar loja';
         toast.error(errorMessage);
       }
     } catch (error) {

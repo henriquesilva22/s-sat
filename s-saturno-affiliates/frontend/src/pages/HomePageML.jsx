@@ -15,7 +15,7 @@ import { ProductGridSkeleton } from '../components/SkeletonLoader'
 import { useFavorites } from '../contexts/FavoritesContext'
 
 // API service
-import { productsAPI, storesAPI } from '../services/api'
+import { productsAPI, storesAPI, API_BASE_URL } from '../services/api'
 
 // Mock data for demonstration
 import { mockProducts, mockStores, mockCategories } from '../data/mockData'
@@ -23,9 +23,6 @@ import { mockProducts, mockStores, mockCategories } from '../data/mockData'
 const HomePageML = () => {
   console.log('🚀 [HomePageML] Componente iniciado');
   
-  // API URL for logging
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-    (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://s-sat.onrender.com');
   // Control whether to show API connection toasts to users.
   // Only enable during development or when explicitly allowed via VITE_SHOW_API_TOASTS=true
   const SHOW_API_CONNECTED_TOAST = import.meta.env.DEV || import.meta.env.VITE_SHOW_API_TOASTS === 'true'

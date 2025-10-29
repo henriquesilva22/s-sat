@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
+import { productsAPI } from '../services/api'
 
 // Components
 import HeaderML from '../components/HeaderML'
@@ -16,28 +17,18 @@ const HomePageMLSimple = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        console.log('🔄 [HomePageMLSimple] Buscando produtos...')
-        
-        const response = await fetch('http://localhost:3001/api/products')
-        console.log('📊 [HomePageMLSimple] Response status:', response.status)
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`)
-        }
-        
-        const data = await response.json()
+        console.log('🔄 [HomePageMLSimple] Buscando produtos via productsAPI...')
+        const data = await productsAPI.getProducts()
         console.log('📋 [HomePageMLSimple] Dados:', data)
-        
-        if (data.success && data.data) {
+        if (data && data.success && data.data) {
           setProducts(data.data)
-          console.log('✅ [HomePageMLSimple] Produtos definidos:', data.data.length)
         } else {
-          throw new Error('Dados inválidos')
+          throw new Error(data?.message || 'Dados inválidos')
         }
       } catch (err) {
         console.error('❌ [HomePageMLSimple] Erro:', err)
-        setError(err.message)
-        toast.error(`Erro: ${err.message}`)
+        setError(err.message || String(err))
+        toast.error(`Erro: ${err.message || String(err)}`)
       } finally {
         setLoading(false)
         console.log('🏁 [HomePageMLSimple] Loading finalizado')

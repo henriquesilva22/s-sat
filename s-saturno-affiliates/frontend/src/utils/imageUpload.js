@@ -7,22 +7,25 @@
  * Exemplo de função para upload de imagem para o servidor
  * Você pode usar esta função no prop onUpload do componente ImageUpload
  */
+import api from '../services/api';
+
 export const uploadImageToServer = async (file) => {
   const formData = new FormData();
   formData.append('image', file);
 
   try {
-    const response = await fetch('http://localhost:3001/api/upload/image', {
-      method: 'POST',
-      body: formData,
+    // Usar axios instance (api) que já tem baseURL configurada
+    const response = await api.post('/api/upload/image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
     });
 
-    if (!response.ok) {
-      throw new Error('Erro no upload da imagem');
+    if (!response.data) {
+      throw new Error('Resposta inválida do servidor');
     }
 
-    const result = await response.json();
-    return result.imageUrl; // Retorna a URL da imagem no servidor
+    return response.data.imageUrl; // Retorna a URL da imagem no servidor
   } catch (error) {
     console.error('Erro ao fazer upload:', error);
     throw error;

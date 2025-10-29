@@ -6,6 +6,7 @@ import FilterSidebar from '../components/FilterSidebar'
 import { ProductGridSkeleton } from '../components/LoadingSkeleton'
 import ToastProvider from '../components/ToastProvider'
 import toast from 'react-hot-toast'
+import api from '../services/api'
 
 const HomePage = () => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -114,10 +115,9 @@ const HomePage = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/admin/categories')
-        if (response.ok) {
-          const result = await response.json()
-          setCategories(result.data || [])
+        const response = await api.get('/api/admin/categories')
+        if (response?.data) {
+          setCategories(response.data.data || [])
         }
       } catch (error) {
         console.error('Erro ao carregar categorias:', error)
