@@ -1,3 +1,15 @@
+
+const express = require('express');
+const bcrypt = require('bcryptjs');
+const { PrismaClient } = require('@prisma/client');
+const { asyncHandler, authenticateToken, requireAdmin } = require('../middleware/auth');
+const { validateProduct, validateStore } = require('../middleware/validation');
+const { generateToken, sanitizeUrl, sanitizeString, formatTags, handlePrismaError } = require('../utils/helpers');
+const { uploadToCloudinary, deleteFromCloudinary } = require('../services/cloudinary');
+
+const router = express.Router();
+const prisma = new PrismaClient();
+
 /**
  * POST /api/admin/cleanup-images
  * Remove todas as imagens dos produtos e lojas do banco e do Cloudinary
@@ -54,16 +66,6 @@ router.post('/cleanup-images', authenticateToken, requireAdmin, asyncHandler(asy
     cloudinaryErrors
   });
 }));
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const { PrismaClient } = require('@prisma/client');
-const { asyncHandler, authenticateToken, requireAdmin } = require('../middleware/auth');
-const { validateProduct, validateStore } = require('../middleware/validation');
-const { generateToken, sanitizeUrl, sanitizeString, formatTags, handlePrismaError } = require('../utils/helpers');
-const { uploadToCloudinary, deleteFromCloudinary } = require('../services/cloudinary');
-
-const router = express.Router();
-const prisma = new PrismaClient();
 
 /**
  * POST /api/admin/login
