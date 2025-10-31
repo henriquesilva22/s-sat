@@ -1,4 +1,7 @@
 
+// Admin routes for S-Saturno Affiliates
+// Fixed hoisting issue for Render deployment - v1.1
+
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const { PrismaClient } = require('@prisma/client');
@@ -7,13 +10,11 @@ const { validateProduct, validateStore } = require('../middleware/validation');
 const { generateToken, sanitizeUrl, sanitizeString, formatTags, handlePrismaError } = require('../utils/helpers');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../services/cloudinary');
 
-// Use `var` here to avoid potential temporal-dead-zone errors if there is
-// a circular require during module initialization in certain Node versions.
-// This keeps the router declaration hoisted and prevents "Cannot access 'router' before initialization".
-var router = express.Router();
+// Create router instance
+const router = express.Router();
 const prisma = new PrismaClient();
 
-// Helper shared across handlers to detect direct image file URLs
+// Helper function
 function isDirectImageUrl(url) {
   return typeof url === 'string' && /\.(jpg|jpeg|png|webp|gif|bmp|svg)(\?.*)?$/i.test(url);
 }
