@@ -27,15 +27,26 @@ app.use(helmet({
 
 // Rate limiting - limitar requisições por IP
 const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutos
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // máximo 100 requests por window
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 60 * 1000, // 1 minuto
+  max: (req, res) => {
+    // Diferentes limites baseados no tipo de requisição
+    if (req.method === 'GET') {
+      return parseInt(process.env.RATE_LIMIT_MAX_GET) || 2000; // Mais permissivo para GET
+    } else if (req.method === 'POST' && req.path.includes('/admin')) {
+      return parseInt(process.env.RATE_LIMIT_MAX_ADMIN_POST) || 100; // Mais restritivo para admin
+    } else {
+      return parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 1000; // Padrão para outras operações
+    }
+  },
   message: {
     error: 'Muitas requisições',
-    message: 'Tente novamente em alguns minutos',
-    retryAfter: Math.ceil((parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000) / 1000)
+    message: 'Tente novamente em alguns segundos',
+    retryAfter: Math.ceil((parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 60000) / 1000)
   },
-  standardHeaders: true, // Retorna rate limit info nos headers `RateLimit-*`
-  legacyHeaders: false, // Desabilita headers `X-RateLimit-*`
+  standardHeaders: true,
+  legacyHeaders: false,
+  // Pular rate limiting para health checks
+  skip: (req, res) => req.path === '/health'
 });
 
 app.use(limiter);

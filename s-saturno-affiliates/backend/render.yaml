@@ -21,6 +21,14 @@ services:
         value: admin123
       - key: CORS_ORIGIN
         value: https://s-sat.onrender.com
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 60000
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 1000
+      - key: RATE_LIMIT_MAX_GET
+        value: 2000
+      - key: RATE_LIMIT_MAX_ADMIN_POST
+        value: 100
 
 databases:
   - name: s-saturno-db
