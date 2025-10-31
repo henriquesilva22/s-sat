@@ -75,7 +75,7 @@ model Product {
   
   @@map("products")
 }
-
+//
 // Tabela de relacionamento many-to-many entre Product e Category
 model ProductCategory {
   id         Int      @id @default(autoincrement())
