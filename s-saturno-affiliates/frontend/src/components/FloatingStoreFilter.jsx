@@ -3,31 +3,57 @@ import { Store, ChevronDown, ChevronUp } from 'lucide-react';
 import './FloatingStoreFilter.css';
 import { storesAPI } from '../services/api';
 
-const FloatingStoreFilter = ({ onStoreFilter }) => {
+// Import mock data as fallback
+const mockStores = [
+  { id: 1, name: 'AliExpress', description: 'Produtos da China', logoUrl: null },
+  { id: 2, name: 'Amazon Brasil', description: 'Loja online brasileira', logoUrl: null },
+  { id: 3, name: 'Mercado Livre', description: 'Marketplace brasileiro', logoUrl: null }
+];
+
+const FloatingStoreFilter = ({ onStoreFilter, stores: storesProp = [] }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [stores, setStores] = useState([]);
+  const [stores, setStores] = useState(storesProp);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // Fetch stores from API
   useEffect(() => {
+    // Se já recebemos stores via props e elas têm dados, usar elas
+    if (storesProp && Array.isArray(storesProp) && storesProp.length > 0) {
+      console.log('📦 [FloatingStoreFilter] Usando stores via props:', storesProp.length);
+      setStores(storesProp);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    // Se não temos stores via props, tentar buscar da API
+    console.log('🌐 [FloatingStoreFilter] Buscando stores da API...');
     const fetchStores = async () => {
       setLoading(true);
       setError(null);
       try {
         const data = await storesAPI.getStores();
-        setStores(data.data || []);
+        const storesData = data.data || [];
+        console.log('✅ [FloatingStoreFilter] Stores carregadas da API:', storesData.length);
+        setStores(storesData);
       } catch (err) {
-        // Friendly error handling for UI
-        console.warn('Erro ao carregar lojas:', err.message || err);
-        setError('Não foi possível carregar as lojas no momento. Tente novamente mais tarde.');
+        console.warn('❌ [FloatingStoreFilter] Erro ao carregar lojas:', err.message || err);
+        // Se falhar a API e não temos stores via props, usar dados mockados
+        if (!storesProp || storesProp.length === 0) {
+          console.log('🔧 [FloatingStoreFilter] Usando dados mockados como fallback');
+          setStores(mockStores);
+          setError(null); // Limpar erro pois temos dados mockados
+        } else {
+          setError('Não foi possível carregar as lojas no momento. Tente novamente mais tarde.');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchStores();
-  }, []);
+  }, [storesProp]);
 
   const handleStoreClick = (store) => {
     if (onStoreFilter) {

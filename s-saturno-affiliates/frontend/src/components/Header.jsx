@@ -310,7 +310,7 @@ const Header = ({
             <div className="flex flex-wrap items-center gap-2 lg:gap-3 pb-1">
               {/* Filtro por loja */}
               <div className="flex items-center gap-2 flex-shrink-0">
-                <Store className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                <Store className="h-4 w-4 text-gray-500 flex-shrink-0 dark:text-gray-400" />
                 <select
                   value={selectedStore || 'all'}
                   onChange={(e) => handleStoreChange(e.target.value)}

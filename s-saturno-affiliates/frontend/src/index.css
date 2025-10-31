@@ -17,23 +17,177 @@
     line-height: 1.6;
   }
 
-  /* Modo de fundo preto simples (toggle via class 'bg-black-mode' no body) */
+  /* Modo de fundo preto elegante */
   body.bg-black-mode {
-    background-color: #000000 !important;
-    color: #ffffff !important;
+    background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0f0f0f 100%) !important;
+    color: #f8fafc !important;
+    transition: all 0.3s ease;
+  }
+
+  /* Fundo da página principal no modo escuro com gradiente sutil */
+  body.bg-black-mode .min-h-screen {
+    background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0f0f0f 100%) !important;
+  }
+
+  /* Container principal no modo escuro */
+  body.bg-black-mode .bg-gray-50 {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
   }
 
   /* Ajustes visuais para elementos de cartão quando em modo preto */
   body.bg-black-mode .card,
   body.bg-black-mode .card-hover {
-    background-color: #0b0b0b !important;
-    color: #e5e7eb !important;
-    border-color: rgba(255,255,255,0.05) !important;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+    color: #f1f5f9 !important;
+    border: 1px solid rgba(148, 163, 184, 0.1) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important;
+    transition: all 0.3s ease;
+  }
+
+  body.bg-black-mode .card-hover:hover {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%) !important;
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3) !important;
+    transform: translateY(-2px);
   }
 
   body.bg-black-mode .btn-primary {
-    background-color: #2563EB !important;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
     color: #ffffff !important;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3) !important;
+    transition: all 0.3s ease;
+  }
+
+  body.bg-black-mode .btn-primary:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
+    box-shadow: 0 6px 12px -2px rgba(59, 130, 246, 0.4) !important;
+    transform: translateY(-1px);
+  }
+
+  /* Filtros e sidebar no modo escuro elegante */
+  body.bg-black-mode .bg-white {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+    color: #f1f5f9 !important;
+    border: 1px solid rgba(148, 163, 184, 0.1) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  body.bg-black-mode .border-gray-300 {
+    border-color: rgba(148, 163, 184, 0.2) !important;
+  }
+
+  body.bg-black-mode .text-gray-900 {
+    color: #f1f5f9 !important;
+  }
+
+  body.bg-black-mode .text-gray-600 {
+    color: #cbd5e1 !important;
+  }
+
+  body.bg-black-mode .text-gray-700 {
+    color: #e2e8f0 !important;
+  }
+
+  /* Inputs e selects no modo escuro elegante */
+  body.bg-black-mode input,
+  body.bg-black-mode select,
+  body.bg-black-mode textarea {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%) !important;
+    color: #f1f5f9 !important;
+    border: 1px solid rgba(148, 163, 184, 0.3) !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.3s ease;
+  }
+
+  body.bg-black-mode input:focus,
+  body.bg-black-mode select:focus,
+  body.bg-black-mode textarea:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), inset 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  body.bg-black-mode input::placeholder,
+  body.bg-black-mode select::placeholder,
+  body.bg-black-mode textarea::placeholder {
+    color: #94a3b8 !important;
+  }
+
+  /* Botões no modo escuro elegante */
+  body.bg-black-mode button {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%) !important;
+    color: #f1f5f9 !important;
+    border: 1px solid rgba(148, 163, 184, 0.2) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+    transition: all 0.3s ease;
+  }
+
+  body.bg-black-mode button:hover {
+    background: linear-gradient(135deg, #475569 0%, #64748b 100%) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+    transform: translateY(-1px);
+  }
+
+  /* Cards de produto no modo escuro */
+  body.bg-black-mode .bg-white.rounded-xl {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+  }
+
+  /* Texto dos produtos no modo escuro */
+  body.bg-black-mode .text-gray-800,
+  body.bg-black-mode .text-gray-900 {
+    color: #e5e7eb !important;
+  }
+
+  /* Preços e informações dos produtos */
+  body.bg-black-mode .text-green-600 {
+    color: #10b981 !important;
+  }
+
+  body.bg-black-mode .text-red-500 {
+    color: #ef4444 !important;
+  }
+
+  /* Sidebar de filtros no modo escuro */
+  body.bg-black-mode aside {
+    background-color: #1f2937 !important;
+    color: #e5e7eb !important;
+  }
+
+  /* Dropdown de ordenação no modo escuro */
+  body.bg-black-mode select {
+    background-color: #374151 !important;
+    color: #e5e7eb !important;
+    border-color: #4b5563 !important;
+  }
+
+  body.bg-black-mode select option {
+    background-color: #374151 !important;
+    color: #e5e7eb !important;
+  }
+
+  /* Botões de visualização (grid/list) no modo escuro */
+  body.bg-black-mode .bg-primary-500 {
+    background-color: #3b82f6 !important;
+  }
+
+  body.bg-black-mode .text-gray-600:hover {
+    background-color: #374151 !important;
+  }
+
+  /* Cabeçalho dos resultados no modo escuro */
+  body.bg-black-mode .text-lg.font-medium {
+    color: #e5e7eb !important;
+  }
+
+  /* Botão de filtros mobile no modo escuro */
+  body.bg-black-mode .bg-white.border {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+    color: #e5e7eb !important;
+  }
+
+  body.bg-black-mode .hover\:bg-gray-50:hover {
+    background-color: #4b5563 !important;
   }
   
   /* Scrollbar customizada para WebKit */
@@ -156,6 +310,27 @@
   .input-base:focus {
     border-color: #3B82F6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  /* Input base no modo escuro */
+  body.bg-black-mode .input-base {
+    background: linear-gradient(135deg, #334155 0%, #475569 100%) !important;
+    color: #f1f5f9 !important;
+    border-color: rgba(148, 163, 184, 0.3) !important;
+  }
+
+  body.bg-black-mode .input-base::placeholder {
+    color: #94a3b8 !important;
+  }
+
+  body.bg-black-mode .input-base:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+  }
+
+  body.bg-black-mode .input-base option {
+    background-color: #374151 !important;
+    color: #e5e7eb !important;
   }
   
   /* Container responsivo */
@@ -392,5 +567,63 @@
   .container-responsive {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
+  }
+}
+
+/* Melhorias visuais adicionais para o modo escuro elegante */
+body.bg-black-mode {
+  /* Efeitos de brilho sutil para elementos especiais */
+  --glow-primary: rgba(59, 130, 246, 0.3);
+  --glow-success: rgba(16, 185, 129, 0.3);
+  --glow-error: rgba(239, 68, 68, 0.3);
+}
+
+/* Animações suaves para transições no modo escuro */
+body.bg-black-mode * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Efeitos especiais para botões primários no modo escuro */
+body.bg-black-mode .btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+
+body.bg-black-mode .btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+body.bg-black-mode .btn-primary:hover::before {
+  left: 100%;
+}
+
+/* Efeitos de profundidade para cards */
+body.bg-black-mode .card,
+body.bg-black-mode .card-hover {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Destaque sutil para elementos focados */
+body.bg-black-mode input:focus,
+body.bg-black-mode select:focus,
+body.bg-black-mode textarea:focus {
+  outline: none;
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 5px var(--glow-primary), inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  to {
+    box-shadow: 0 0 20px var(--glow-primary), 0 0 30px var(--glow-primary), inset 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 }

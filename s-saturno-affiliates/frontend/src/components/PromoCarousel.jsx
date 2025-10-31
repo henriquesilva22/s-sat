@@ -60,16 +60,43 @@ const PromoCarousel = () => {
               <div className="slide-content">
                 <div className="slide-layout">
                   {slide.isLogo ? (
-                    <div className="slide-icon">
-                      <img 
-                        src="/planeta-terra-saturno.svg" 
-                        alt="Planeta Terra-Saturno" 
-                        style={{ 
-                          height: '80px', 
-                          width: 'auto', 
-                          maxWidth: '200px'
-                        }} 
-                      />
+                    <div className="slide-icon" aria-hidden={false}>
+                      <svg
+                        width="80"
+                        height="80"
+                        viewBox="0 0 64 64"
+                        xmlns="http://www.w3.org/2000/svg"
+                        role="img"
+                        aria-label="Ícone de planeta"
+                      >
+                        <title>Ícone de planeta</title>
+                        {/* Planeta */}
+                        <circle cx="32" cy="32" r="14" fill="none" stroke="#FFFFFF" strokeWidth="3" />
+                        {/* Anel (frente) */}
+                        <ellipse
+                          cx="32"
+                          cy="32"
+                          rx="26"
+                          ry="10"
+                          transform="rotate(-20 32 32)"
+                          fill="none"
+                          stroke="#FFFFFF"
+                          strokeOpacity="0.9"
+                          strokeWidth="3"
+                        />
+                        {/* Anel (glow) */}
+                        <ellipse
+                          cx="32"
+                          cy="32"
+                          rx="26"
+                          ry="10"
+                          transform="rotate(-20 32 32)"
+                          fill="none"
+                          stroke="#FFFFFF"
+                          strokeOpacity="0.3"
+                          strokeWidth="6"
+                        />
+                      </svg>
                     </div>
                   ) : (
                     <div className="slide-icon">{slide.icon}</div>

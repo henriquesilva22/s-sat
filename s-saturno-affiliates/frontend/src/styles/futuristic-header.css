@@ -19,6 +19,8 @@
   transition: all 0.3s ease;
 }
 
+/* Dark mode overrides for header - REMOVED: header stays normal */
+
 /* Remove sticky behavior - header stays at top only */
 .shopee-header.scrolled {
   position: static !important;
@@ -219,6 +221,8 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+/* Dark mode removed for search box */
+
 .back-btn-shopee {
   background: transparent;
   border: none;
@@ -231,6 +235,8 @@
   justify-content: center;
   border-right: 1px solid #eee;
 }
+
+/* Dark mode removed for back button */
 
 .back-btn-shopee:hover {
   background: #f5f5f5;
@@ -246,6 +252,8 @@
   color: #333;
   min-width: 0;
 }
+
+/* Dark mode removed for search input */
 
 @media (min-width: 640px) {
   .search-input-shopee {
@@ -264,6 +272,8 @@
   color: #999;
 }
 
+/* Dark mode removed for placeholder */
+
 .search-btn-shopee {
   background: var(--shopee-red);
   border: none;
@@ -272,6 +282,8 @@
   cursor: pointer;
   transition: background 0.2s ease;
 }
+
+/* Dark mode removed for search button */
 
 .search-btn-shopee:hover {
   background: var(--shopee-dark-red);
@@ -302,6 +314,8 @@
   align-items: center;
   gap: 20px;
 }
+
+/* Dark mode removed for categories section */
 
 .categories-label {
   color: var(--text-white);

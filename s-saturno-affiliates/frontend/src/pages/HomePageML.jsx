@@ -23,9 +23,9 @@ import { mockProducts, mockStores, mockCategories } from '../data/mockData'
 const HomePageML = () => {
   console.log('🚀 [HomePageML] Componente iniciado');
   
-  // Control whether to show API connection toasts to users.
-  // Only enable during development or when explicitly allowed via VITE_SHOW_API_TOASTS=true
-  const SHOW_API_CONNECTED_TOAST = import.meta.env.DEV || import.meta.env.VITE_SHOW_API_TOASTS === 'true'
+  // Controlar toasts: por padrão NÃO mostrar para usuários finais.
+  // Só mostra em ambiente de desenvolvimento E quando explicitamente habilitado (opt-in).
+  const SHOW_API_CONNECTED_TOAST = (import.meta.env.DEV && import.meta.env.VITE_SHOW_API_TOASTS === 'true')
   
   // States
   const [products, setProducts] = useState([])
@@ -84,7 +84,7 @@ const HomePageML = () => {
             console.log('📂 [HomePageML] Usando categorias mock')
             setCategories(mockCategories)
             
-            // Mostrar toast de sucesso (apenas em dev ou quando habilitado)
+            // Toast só em DEV e com flag explícita
             if (SHOW_API_CONNECTED_TOAST) {
               toast.success('📡 Conectado à API - produtos atualizados!')
             }
@@ -94,13 +94,19 @@ const HomePageML = () => {
         } catch (apiError) {
           console.log('📦 [HomePageML] API indisponível, usando dados de demonstração')
           
-          // Usar dados mockados
+          // Usar dados mockados - FORÇAR PARA FUNCIONAR OS FILTROS
           setProducts(mockProducts)
           setStores(mockStores)
           setCategories(mockCategories)
           
-          // Mostrar toast informativo apenas uma vez
-          if (!sessionStorage.getItem('demoDataNotified')) {
+          console.log('🔧 [HomePageML] Dados mockados carregados para testes:', {
+            products: mockProducts.length,
+            stores: mockStores.length,
+            categories: mockCategories.length
+          })
+          
+          // Toast de demonstração: nunca em produção
+          if (SHOW_API_CONNECTED_TOAST && !sessionStorage.getItem('demoDataNotified')) {
             toast.success('🌟 Visualizando dados de demonstração!', {
               duration: 4000,
               position: 'top-center'
@@ -122,10 +128,12 @@ const HomePageML = () => {
         setError(null) // Não mostrar erro se temos dados mockados
         setLoading(false)
         
-        toast.success('� Visualizando dados de demonstração!', {
-          duration: 4000,
-          position: 'top-center'
-        })
+        if (SHOW_API_CONNECTED_TOAST) {
+          toast.success('🌟 Visualizando dados de demonstração!', {
+            duration: 4000,
+            position: 'top-center'
+          })
+        }
       }
     }
 
@@ -418,7 +426,7 @@ const HomePageML = () => {
       
       {/* Floating Buttons */}
       <FloatingFavoritesButton />
-      <FloatingStoreFilter onStoreFilter={handleStoreFilter} />
+      <FloatingStoreFilter onStoreFilter={handleStoreFilter} stores={stores} />
     </div>
   )
 }

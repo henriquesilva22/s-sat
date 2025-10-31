@@ -148,11 +148,6 @@ const HeaderML = ({ onSearch, searchQuery = "", onCategoryFilter, showBackButton
           >
             {isBlackMode ? <Sun size={18} /> : <Moon size={18} />}
           </button>
-
-          <button className="action-btn-shopee cart-btn-shopee">
-            <ShoppingCart size={20} />
-            <span className="badge">0</span>
-          </button>
         </div>
       </div>
 

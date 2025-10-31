@@ -178,3 +178,46 @@
     padding: 8px 12px;
   }
 }
+
+/* Modo escuro */
+body.bg-black-mode .store-dropdown {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-color: rgba(148, 163, 184, 0.2);
+  color: #f1f5f9;
+}
+
+body.bg-black-mode .store-dropdown-header {
+  background: linear-gradient(135deg, #ff6600 0%, #d0011b 100%);
+  border-bottom-color: rgba(148, 163, 184, 0.2);
+}
+
+body.bg-black-mode .store-dropdown-header h3 {
+  color: #ffffff;
+}
+
+body.bg-black-mode .clear-filter-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+body.bg-black-mode .clear-filter-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+body.bg-black-mode .store-item:hover {
+  background: rgba(148, 163, 184, 0.1);
+}
+
+body.bg-black-mode .store-name {
+  color: #f1f5f9;
+}
+
+body.bg-black-mode .store-description {
+  color: #cbd5e1;
+}
+
+body.bg-black-mode .store-loading,
+body.bg-black-mode .store-error,
+body.bg-black-mode .no-stores {
+  color: #cbd5e1;
+}

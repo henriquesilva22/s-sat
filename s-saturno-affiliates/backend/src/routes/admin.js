@@ -7,8 +7,16 @@ const { validateProduct, validateStore } = require('../middleware/validation');
 const { generateToken, sanitizeUrl, sanitizeString, formatTags, handlePrismaError } = require('../utils/helpers');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../services/cloudinary');
 
-const router = express.Router();
+// Use `var` here to avoid potential temporal-dead-zone errors if there is
+// a circular require during module initialization in certain Node versions.
+// This keeps the router declaration hoisted and prevents "Cannot access 'router' before initialization".
+var router = express.Router();
 const prisma = new PrismaClient();
+
+// Helper shared across handlers to detect direct image file URLs
+function isDirectImageUrl(url) {
+  return typeof url === 'string' && /\.(jpg|jpeg|png|webp|gif|bmp|svg)(\?.*)?$/i.test(url);
+}
 
 /**
  * POST /api/admin/cleanup-images
@@ -329,10 +337,7 @@ router.post('/products', authenticateToken, requireAdmin, validateProduct.create
     let processedImageUrl = imageUrl;
     console.log('🔍 [DEBUG] ImageUrl recebida:', imageUrl ? 'Base64 detectado ou URL recebida' : 'Nenhuma imagem');
 
-    // Função para checar se é URL direta de imagem
-    function isDirectImageUrl(url) {
-      return typeof url === 'string' && /\.(jpg|jpeg|png|webp|gif|bmp|svg)(\?.*)?$/i.test(url);
-    }
+    // Usamos a função global isDirectImageUrl definida no topo do arquivo
 
     if (imageUrl && imageUrl.startsWith('data:image/')) {
       console.log('☁️ [CLOUDINARY] Tentando upload para Cloudinary...');
@@ -375,8 +380,7 @@ router.post('/products', authenticateToken, requireAdmin, validateProduct.create
       rating: rating !== undefined && rating !== null && rating !== '' ? parseFloat(rating) : null,
       reviewCount: reviewCount !== undefined && reviewCount !== null && reviewCount !== '' ? parseInt(reviewCount) : 0,
       soldCount: soldCount !== undefined && soldCount !== null && soldCount !== '' ? parseInt(soldCount) : 0,
-      freeShipping: freeShipping !== undefined ? Boolean(freeShipping) : true,
-      warranty: warranty !== undefined ? Boolean(warranty) : false
+      freeShipping: freeShipping !== undefined ? Boolean(freeShipping) : true
     };
 
     // Debug das categorias
@@ -540,13 +544,7 @@ router.put('/products/:id', authenticateToken, requireAdmin, validateProduct.upd
 
     // Processar imagem se for base64 ou URL inválida
     let processedImageUrl = updateData.imageUrl;
-    function isDirectImageUrl(url) {
-      return typeof url === 'string' && /\.(jpg|jpeg|png|webp|gif|bmp|svg)(\?.*)?$/i.test(url);
-    }
-    // Função para checar se é URL direta de imagem
-    function isDirectImageUrl(url) {
-      return typeof url === 'string' && /\.(jpg|jpeg|png|webp|gif|bmp|svg)(\?.*)?$/i.test(url);
-    }
+    // Usamos a função global isDirectImageUrl definida no topo do arquivo
     if (updateData.imageUrl && updateData.imageUrl.startsWith('data:image/')) {
       console.log('☁️ [CLOUDINARY UPDATE] Tentando upload para Cloudinary...');
       try {
@@ -788,10 +786,12 @@ router.post('/stores', authenticateToken, requireAdmin, validateStore.create, as
           console.log('⚠️ [CLOUDINARY STORE] Não configurado, usando fallback');
           throw new Error('Cloudinary não configurado');
         }
-      } catch (error) {
+        } catch (error) {
         console.error('❌ [CLOUDINARY STORE] Erro no upload:', error);
-        console.log('🔄 [FALLBACK STORE] Usando logo de placeholder...');
-        processedLogoUrl = `https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=400&h=400&fit=crop&q=80`;
+        console.log('🔄 [FALLBACK STORE] Cloudinary não configurado ou upload falhou — não será salvo o logo');
+        // Não usar imagens de placeholder em produção: preferimos deixar vazio para que
+        // a loja não tenha logo até que o usuário faça upload explícito.
+        processedLogoUrl = '';
       }
     }
 
@@ -870,10 +870,11 @@ router.put('/stores/:id', authenticateToken, requireAdmin, asyncHandler(async (r
           console.log('⚠️ [CLOUDINARY STORE UPDATE] Não configurado, usando fallback');
           throw new Error('Cloudinary não configurado');
         }
-      } catch (error) {
+        } catch (error) {
         console.error('❌ [CLOUDINARY STORE UPDATE] Erro no upload:', error);
-        console.log('🔄 [FALLBACK STORE UPDATE] Usando logo de placeholder...');
-        processedLogoUrl = `https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=400&h=400&fit=crop&q=80`;
+        console.log('🔄 [FALLBACK STORE UPDATE] Cloudinary não configurado ou upload falhou — não será salvo o logo');
+        // Não atribuir imagem de placeholder; manter em branco para indicar ausência de logo
+        processedLogoUrl = '';
       }
     }
 
@@ -1051,15 +1052,31 @@ router.get('/categories', authenticateToken, requireAdmin, asyncHandler(async (r
             products: true
           }
         }
-      },
-      orderBy: {
-        name: 'asc'
       }
+    });
+
+    // Ordenação customizada: Eletrônicos, Beleza & Saúde, Roupas & Acessórios, Outros
+    const categoryOrder = {
+      'eletronicos': 1,
+      'beleza-saude': 2,
+      'roupas-acessorios': 3
+    };
+
+    const sortedCategories = categories.sort((a, b) => {
+      const orderA = categoryOrder[a.slug] || 4;
+      const orderB = categoryOrder[b.slug] || 4;
+      
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+      
+      // Para categorias na mesma prioridade, ordenar alfabeticamente
+      return a.name.localeCompare(b.name);
     });
 
     res.json({
       success: true,
-      data: categories
+      data: sortedCategories
     });
 
   } catch (error) {

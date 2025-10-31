@@ -18,7 +18,7 @@ import AdminHeader from '../components/AdminHeader';
 import FooterML from '../components/FooterML';
 import CategorySelector from '../components/CategorySelector';
 import ImageUpload from '../components/ImageUploadSimple';
-import { adminAPI } from '../services/api';
+import { adminAPI, API_BASE_URL } from '../services/api';
 import { useAuth, useAdmin } from '../hooks/useAdmin';
 import { formatPrice, formatDate, formatNumber } from '../utils/helpers';
 import toast from 'react-hot-toast';
@@ -54,14 +54,14 @@ const AdminDashboard = () => {
   const [showEditProductModal, setShowEditProductModal] = useState(false);
   const [showNewCategoryModal, setShowNewCategoryModal] = useState(false);
   
-  // Estados para categorias
-  const [categories, setCategories] = useState([]);
+  // Estados para filtros de produtos
+  const [productFilter, setProductFilter] = useState('all'); // 'all', 'eletronicos', 'beleza', 'moda', 'outros1', 'outros2'
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  
+  // Estados para seleção de categorias
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [editSelectedCategories, setEditSelectedCategories] = useState([]);
-  const [newCategory, setNewCategory] = useState({
-    name: '',
-    description: ''
-  });
+  const [categories, setCategories] = useState([]);
   
   // Estados para formulários
   const [newStore, setNewStore] = useState({
@@ -81,8 +81,7 @@ const AdminDashboard = () => {
     rating: '',
     reviewCount: '',
     soldCount: '',
-    freeShipping: true,
-    warranty: true
+    freeShipping: true
   });
   
   const [editStore, setEditStore] = useState({
@@ -104,8 +103,7 @@ const AdminDashboard = () => {
     rating: '',
     reviewCount: '',
     soldCount: '',
-    freeShipping: true,
-    warranty: true
+    freeShipping: true
   });
 
   // Redirecionar se não autenticado
@@ -115,14 +113,40 @@ const AdminDashboard = () => {
     }
   }, [isAuthenticated, authLoading]);
 
-  // Carregar dados iniciais
+  // Filtrar produtos por categoria
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchDashboard();
-      fetchAdminProducts();
-      fetchAdminStores();
+    if (productFilter === 'all') {
+      setFilteredProducts(products);
+    } else {
+      const filtered = products.filter(product => {
+        if (!product.categories || product.categories.length === 0) {
+          return productFilter === 'outros1'; // Produtos sem categoria vão para "outros1"
+        }
+        
+        return product.categories.some(cat => {
+          const categoryName = cat.category?.name?.toLowerCase() || '';
+          switch (productFilter) {
+            case 'eletronicos':
+              return categoryName.includes('eletrôn') || categoryName.includes('eletron') || categoryName.includes('celular') || categoryName.includes('computador');
+            case 'beleza':
+              return categoryName.includes('beleza') || categoryName.includes('cosmétic') || categoryName.includes('perfume') || categoryName.includes('cabelo');
+            case 'moda':
+              return categoryName.includes('moda') || categoryName.includes('roupa') || categoryName.includes('vestuário') || categoryName.includes('acessóri');
+            case 'outros1':
+              return !categoryName.includes('eletrôn') && !categoryName.includes('eletron') && !categoryName.includes('celular') && 
+                     !categoryName.includes('computador') && !categoryName.includes('beleza') && !categoryName.includes('cosmétic') && 
+                     !categoryName.includes('perfume') && !categoryName.includes('cabelo') && !categoryName.includes('moda') && 
+                     !categoryName.includes('roupa') && !categoryName.includes('vestuário') && !categoryName.includes('acessóri');
+            case 'outros2':
+              return false; // Por enquanto vazio, pode ser usado para outras categorias
+            default:
+              return true;
+          }
+        });
+      });
+      setFilteredProducts(filtered);
     }
-  }, [isAuthenticated]);
+  }, [products, productFilter]);
 
   /**
    * Lidar com exclusão de produto
@@ -217,7 +241,6 @@ const AdminDashboard = () => {
         reviewCount: newProduct.reviewCount ? parseInt(newProduct.reviewCount) : 0,
         soldCount: newProduct.soldCount ? parseInt(newProduct.soldCount) : 0,
         freeShipping: newProduct.freeShipping,
-        warranty: newProduct.warranty,
         categoryIds: selectedCategories
       };
 
@@ -234,21 +257,8 @@ const AdminDashboard = () => {
       console.log('🔍 [DEBUG] selectedCategories:', selectedCategories);
       
       // DEBUG DETALHADO - Valores exatos sendo enviados
-      console.log('📋 [VALORES EXATOS]', {
-        title: productData.title,
-        description: productData.description,
-        price: productData.price,
-        originalPrice: productData.originalPrice,
-        storeId: productData.storeId,
-        rating: productData.rating,
-        reviewCount: productData.reviewCount,
-        soldCount: productData.soldCount,
-        freeShipping: productData.freeShipping,
-        warranty: productData.warranty,
-        categoryIds: productData.categoryIds,
-        affiliateUrl: productData.affiliateUrl,
-        imageUrl: productData.imageUrl ? 'Base64 presente' : 'Vazio'
-      });
+      console.log('� [DEBUG] API_BASE_URL:', API_BASE_URL);
+      console.log('🔍 [DEBUG] URL completa:', `${API_BASE_URL}/api/admin/products`);
 
       const response = await fetch(`${API_BASE_URL}/api/admin/products`, {
         method: 'POST',
@@ -273,8 +283,7 @@ const AdminDashboard = () => {
           rating: '',
           reviewCount: '',
           soldCount: '',
-          freeShipping: true,
-          warranty: true
+          freeShipping: true
         });
         setSelectedCategories([]);
         fetchAdminProducts(); // Recarregar lista
@@ -324,8 +333,7 @@ const AdminDashboard = () => {
       rating: product.rating ? product.rating.toString() : '',
       reviewCount: product.reviewCount ? product.reviewCount.toString() : '',
       soldCount: product.soldCount ? product.soldCount.toString() : '',
-      freeShipping: product.freeShipping !== undefined ? product.freeShipping : true,
-      warranty: product.warranty !== undefined ? product.warranty : true
+      freeShipping: product.freeShipping !== undefined ? product.freeShipping : true
     });
     // Configurar categorias selecionadas
     const productCategories = product.categories ? product.categories.map(cat => cat.category.id) : [];
@@ -428,7 +436,6 @@ const AdminDashboard = () => {
         reviewCount: reviewCount,
         soldCount: soldCount,
         freeShipping: Boolean(editProduct.freeShipping),
-        warranty: Boolean(editProduct.warranty),
         categoryIds: editSelectedCategories
       };
 
@@ -715,6 +722,97 @@ const AdminDashboard = () => {
               </button>
             </div>
 
+            {/* Filtros por categoria */}
+            <div className="bg-white rounded-lg shadow-sm p-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Filtrar por Categoria</h3>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setProductFilter('all')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    productFilter === 'all'
+                      ? 'bg-primary-500 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Todos ({products.length})
+                </button>
+                <button
+                  onClick={() => setProductFilter('eletronicos')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    productFilter === 'eletronicos'
+                      ? 'bg-primary-500 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Eletrônicos ({products.filter(p => p.categories?.some(cat => 
+                    (cat.category?.name?.toLowerCase() || '').includes('eletrôn') || 
+                    (cat.category?.name?.toLowerCase() || '').includes('eletron') ||
+                    (cat.category?.name?.toLowerCase() || '').includes('celular') ||
+                    (cat.category?.name?.toLowerCase() || '').includes('computador')
+                  )).length})
+                </button>
+                <button
+                  onClick={() => setProductFilter('beleza')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    productFilter === 'beleza'
+                      ? 'bg-primary-500 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Beleza ({products.filter(p => p.categories?.some(cat => 
+                    (cat.category?.name?.toLowerCase() || '').includes('beleza') || 
+                    (cat.category?.name?.toLowerCase() || '').includes('cosmétic') ||
+                    (cat.category?.name?.toLowerCase() || '').includes('perfume') ||
+                    (cat.category?.name?.toLowerCase() || '').includes('cabelo')
+                  )).length})
+                </button>
+                <button
+                  onClick={() => setProductFilter('moda')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    productFilter === 'moda'
+                      ? 'bg-primary-500 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Moda ({products.filter(p => p.categories?.some(cat => 
+                    (cat.category?.name?.toLowerCase() || '').includes('moda') || 
+                    (cat.category?.name?.toLowerCase() || '').includes('roupa') ||
+                    (cat.category?.name?.toLowerCase() || '').includes('vestuário') ||
+                    (cat.category?.name?.toLowerCase() || '').includes('acessóri')
+                  )).length})
+                </button>
+                <button
+                  onClick={() => setProductFilter('outros1')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    productFilter === 'outros1'
+                      ? 'bg-primary-500 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Outros 1 ({products.filter(p => {
+                    if (!p.categories || p.categories.length === 0) return true;
+                    return p.categories.some(cat => {
+                      const name = cat.category?.name?.toLowerCase() || '';
+                      return !name.includes('eletrôn') && !name.includes('eletron') && !name.includes('celular') && 
+                             !name.includes('computador') && !name.includes('beleza') && !name.includes('cosmétic') && 
+                             !name.includes('perfume') && !name.includes('cabelo') && !name.includes('moda') && 
+                             !name.includes('roupa') && !name.includes('vestuário') && !name.includes('acessóri');
+                    });
+                  }).length})
+                </button>
+                <button
+                  onClick={() => setProductFilter('outros2')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    productFilter === 'outros2'
+                      ? 'bg-primary-500 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Outros 2 (0)
+                </button>
+              </div>
+            </div>
+
             <div className="bg-white rounded-lg shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -741,7 +839,7 @@ const AdminDashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {products.map((product) => (
+                    {filteredProducts.map((product) => (
                       <tr key={product.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
