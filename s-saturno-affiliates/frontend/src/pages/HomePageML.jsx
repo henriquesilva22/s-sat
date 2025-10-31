@@ -10,6 +10,7 @@ import FilterSidebarML from '../components/FilterSidebarML'
 import FloatingFavoritesButton from '../components/FloatingFavoritesButton'
 import FloatingStoreFilter from '../components/FloatingStoreFilter'
 import { ProductGridSkeleton } from '../components/SkeletonLoader'
+import SEO from '../components/SEO'
 
 // Contexts
 import { useFavorites } from '../contexts/FavoritesContext'
@@ -285,6 +286,15 @@ const HomePageML = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* SEO específico para homepage */}
+      <SEO
+        title="S-Saturno Affiliates - Marketplace de Produtos com os Melhores Preços"
+        description="Encontre os melhores produtos com preços incríveis no S-Saturno Affiliates. Eletrônicos, beleza, moda, casa e muito mais com ofertas exclusivas e frete grátis."
+        keywords="marketplace, afiliados, ofertas, produtos, eletrônicos, beleza, moda, casa, jardim, esportes, automotivo, compras online, frete grátis"
+        url="https://s-saturno.vercel.app/"
+        type="website"
+      />
+      
       <HeaderML onSearch={handleSearch} searchQuery={searchQuery} onCategoryFilter={handleCategorySearch} />
       
       <div className="flex-1 container mx-auto px-2 sm:px-4 lg:px-6 py-4 sm:py-6">
@@ -302,6 +312,9 @@ const HomePageML = () => {
 
           {/* Main Content */}
           <div className="flex-1">
+            {/* SEO Heading Principal */}
+            <h1 className="sr-only">S-Saturno Affiliates - Marketplace de Produtos</h1>
+            
             {/* Results Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-4">
               <div className="flex items-center gap-4">
@@ -318,9 +331,9 @@ const HomePageML = () => {
                     <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
                   ) : (
                     <>
-                      <h1 className="text-lg font-medium text-gray-900">
+                      <h2 className="text-lg font-medium text-gray-900">
                         {searchQuery ? `Resultados para "${searchQuery}"` : 'Todos os produtos'}
-                      </h1>
+                      </h2>
                     </>
                   )}
                 </div>
@@ -372,9 +385,9 @@ const HomePageML = () => {
             ) : error ? (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">❌</div>
-                <h3 className="text-xl font-bold text-red-800 mb-2">
+                <h2 className="text-xl font-bold text-red-800 mb-2">
                   Erro ao carregar produtos
-                </h3>
+                </h2>
                 <p className="text-red-600 mb-4">
                   {error}
                 </p>
@@ -388,9 +401,9 @@ const HomePageML = () => {
             ) : filteredProducts.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">🔍</div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">
+                <h2 className="text-xl font-bold text-gray-800 mb-2">
                   Nenhum produto encontrado
-                </h3>
+                </h2>
                 <p className="text-gray-600 mb-4">
                   Tente ajustar os filtros ou fazer uma nova busca
                 </p>

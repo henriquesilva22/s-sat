@@ -15,6 +15,10 @@ import AdminDashboard from './pages/AdminDashboard';
 import TestProducts from './pages/TestProducts';
 import HomePageMLSimple from './pages/HomePageMLSimple';
 
+// Importar componentes
+import NotFound from './components/NotFound';
+import SEO from './components/SEO';
+
 // Importar contextos
 import { FavoritesProvider } from './contexts/FavoritesContext';
 
@@ -31,6 +35,9 @@ function App() {
   return (
     <FavoritesProvider>
       <Router>
+        {/* SEO Global */}
+        <SEO />
+
         <div className="App">
           <Routes>
             {/* Rota principal - Nova versão com design MercadoLivre */}
@@ -88,41 +95,6 @@ function App() {
       </div>
     </Router>
     </FavoritesProvider>
-  );
-}
-
-/**
- * Componente de página não encontrada
- */
-function NotFound() {
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="text-center">
-          <h1 className="text-6xl font-bold text-gray-900 mb-4">404</h1>
-          <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-            Página não encontrada
-          </h2>
-          <p className="text-gray-600 mb-8">
-            A página que você está procurando não existe ou foi movida.
-          </p>
-          <div className="space-x-4">
-            <button
-              onClick={() => window.location.href = '/'}
-              className="btn-primary"
-            >
-              Voltar ao Início
-            </button>
-            <button
-              onClick={() => window.history.back()}
-              className="btn-secondary"
-            >
-              Página Anterior
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
 

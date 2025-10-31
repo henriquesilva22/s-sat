@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+
+# Bloquear páginas admin e áreas privadas
+Disallow: /admin
+Disallow: /admin/*
+
+# Permitir todos os motores de busca
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Sitemap
+Sitemap: https://s-saturno.vercel.app/sitemap.xml
