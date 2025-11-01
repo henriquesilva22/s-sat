@@ -8,6 +8,8 @@ import './index.css';
 import Home from './pages/Home';
 import HomePageNew from './pages/HomePageNew';
 import HomePageML from './pages/HomePageML';
+import ProductsPage from './pages/ProductsPage';
+import ContactPage from './pages/ContactPage';
 import FavoritesPage from './pages/FavoritesPage';
 import AdminLogin from './pages/AdminLogin';
 import AdminLoginSimple from './pages/AdminLoginSimple';
@@ -49,6 +51,10 @@ function App() {
             {/* Versão antiga */}
             <Route path="/old" element={<Home />} />
             
+            {/* Páginas principais adicionais */}
+            <Route path="/produtos" element={<ProductsPage />} />
+            <Route path="/contato" element={<ContactPage />} />
+
             {/* Versão intermediária */}
             <Route path="/new" element={<HomePageNew />} />
             

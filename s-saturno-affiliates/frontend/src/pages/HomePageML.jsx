@@ -293,6 +293,26 @@ const HomePageML = () => {
         keywords="marketplace, afiliados, ofertas, produtos, eletrônicos, beleza, moda, casa, jardim, esportes, automotivo, compras online, frete grátis"
         url="https://s-saturno.vercel.app/"
         type="website"
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "S-Saturno Affiliates",
+            "url": "https://s-saturno.vercel.app/",
+            "logo": "https://s-saturno.vercel.app/logo-s-saturno.svg"
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "S-Saturno Affiliates",
+            "url": "https://s-saturno.vercel.app/",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://s-saturno.vercel.app/?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          }
+        ]}
       />
       
       <HeaderML onSearch={handleSearch} searchQuery={searchQuery} onCategoryFilter={handleCategorySearch} />

@@ -11,7 +11,8 @@ const SEO = ({
   image = "https://s-saturno.vercel.app/og-image.jpg",
   url = "https://s-saturno.vercel.app/",
   type = "website",
-  robots = "index, follow"
+  robots = "index, follow",
+  jsonLd = null // Aceita objeto ou array de objetos JSON-LD
 }) => {
   useEffect(() => {
     // Atualizar title
@@ -64,7 +65,23 @@ const SEO = ({
       document.head.appendChild(canonical);
     }
 
-  }, [title, description, keywords, image, url, type, robots]);
+    // JSON-LD Structured Data (opcional)
+    // Remove anterior, se existir
+    const priorJsonLd = document.getElementById('seo-jsonld');
+    if (priorJsonLd) {
+      priorJsonLd.remove();
+    }
+
+    if (jsonLd) {
+      const script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.id = 'seo-jsonld';
+      const data = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
+      script.text = JSON.stringify(data);
+      document.head.appendChild(script);
+    }
+
+  }, [title, description, keywords, image, url, type, robots, jsonLd]);
 
   return null; // Este componente não renderiza nada
 };
