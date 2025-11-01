@@ -12,5 +12,6 @@ Allow: /
 User-agent: Bingbot
 Allow: /
 
-# Sitemap
+# Sitemaps
 Sitemap: https://s-saturno.vercel.app/sitemap.xml
+Sitemap: https://s-saturno.vercel.app/sitemap_index.xml
